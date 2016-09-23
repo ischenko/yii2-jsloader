@@ -1,0 +1,156 @@
+<?php
+/**
+ * @copyright Copyright (c) 2016 Roman Ishchenko
+ * @license https://github.com/ischenko/yii2-jsloader/blob/master/LICENSE
+ * @link https://github.com/ischenko/yii2-jsloader#readme
+ */
+
+namespace ischenko\yii2\jsloader\base;
+
+use yii\base\Object;
+use yii\helpers\ArrayHelper;
+use yii\web\AssetBundle;
+use yii\web\JqueryAsset;
+use yii\web\View;
+
+use ischenko\yii2\jsloader\LoaderInterface;
+
+/**
+ * TODO: write description
+ *
+ * @author Roman Ishchenko <roman@ishchenko.ck.ua>
+ * @since 1.0
+ */
+abstract class Loader extends Object implements LoaderInterface
+{
+    /**
+     * @var View
+     */
+    private $_view;
+
+    /**
+     * Loader constructor.
+     *
+     * @param View $view
+     * @param array $config
+     */
+    public function __construct(View $view, array $config = [])
+    {
+        parent::__construct($config);
+
+        $this->_view = $view;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    abstract public function getConfig();
+
+    /**
+     * Performs actual rendering of the JS loader
+     */
+    abstract protected function doRender();
+
+    /**
+     * @inheritDoc
+     */
+    public function getView()
+    {
+        return $this->_view;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerAssetBundle($name)
+    {
+        $view = $this->getView();
+
+        if (!isset($view->assetBundles[$name])) {
+            return false;
+        }
+
+        $bundle = $view->assetBundles[$name];
+
+        if (!($bundle instanceof AssetBundle)) {
+            return false;
+        }
+
+        $config = $this->getConfig();
+
+        foreach ($bundle->depends as $dependency) {
+            if ($this->registerAssetBundle($dependency) !== false) {
+                $config->addDependency($name, $dependency);
+            }
+        }
+
+        $am = $view->getAssetManager();
+
+        foreach ($bundle->js as $js) {
+            $options = $bundle->jsOptions;
+
+            if (!is_array($js)) {
+                $config->addFile($am->getAssetUrl($bundle, $js), $options, $name);
+            } else {
+                $file = $am->getAssetUrl($bundle, array_shift($js));
+                $config->addFile($file, ArrayHelper::merge($options, $js), $name);
+            }
+        }
+
+        $bundle->js = [];
+
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function processAssets()
+    {
+        $view = $this->getView();
+
+        $codeBlockSections = [
+            View::POS_BEGIN,
+            View::POS_END,
+            View::POS_LOAD,
+            View::POS_READY
+        ];
+
+        $config = $this->getConfig();
+
+        foreach ($codeBlockSections as $section) {
+            if (empty($view->js[$section])) {
+                continue;
+            }
+
+            $dependencies = [];
+            $codeBlock = implode("\n", $view->js[$section]);
+
+            if ($section == View::POS_LOAD || $section == View::POS_READY) {
+                $dependencies[] = JqueryAsset::className();
+
+                if ($section == View::POS_LOAD) {
+                    $codeBlock = "jQuery(window).load(function () {\n{$codeBlock}\n});";
+                }
+
+                if ($section == View::POS_READY) {
+                    $codeBlock = "jQuery(document).ready(function () {\n{$codeBlock}\n});";
+                }
+            }
+
+            $config->addCodeBlock($codeBlock, $dependencies);
+
+            unset($view->js[$section]);
+        }
+
+        $this->doRender();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfig($config)
+    {
+        $this->getConfig()->mergeWith($config);
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "ischenko/yii2-jsloader",
+  "description": "An Yii2 extension which allows to handle asset bundles by JS loaders such as requirejs",
+  "keywords": [
+    "yii2",
+    "view",
+    "requirejs",
+    "behavior",
+    "assets"
+  ],
+  "type": "yii2-extension",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Roman Ishchenko",
+      "email": "roman@ishchenko.ck.ua"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "yiisoft/yii2": "~2.0"
+  },
+  "require-dev": {
+    "codeception/verify": "*",
+    "codeception/specify": "*",
+    "codeception/codeception": "2.2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ischenko\\yii2\\jsloader\\": "src/"
+    }
+  }
+}
