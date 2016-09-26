@@ -23,15 +23,6 @@ interface ConfigInterface
     public function toArray();
 
     /**
-     * Merges current configuration set with given
-     *
-     * @param ConfigInterface|array $config configuration set to merge with
-     *
-     * @return $this
-     */
-    public function mergeWith($config);
-
-    /**
      * Adds JS file into configuration
      *
      * @param string $file filename or URL to be added

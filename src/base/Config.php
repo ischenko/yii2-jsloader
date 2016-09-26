@@ -71,12 +71,4 @@ abstract class Config extends Object implements ConfigInterface
 
         return $this;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function mergeWith($config)
-    {
-        // TODO: Implement mergeWith() method.
-    }
 }

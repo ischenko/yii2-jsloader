@@ -129,9 +129,4 @@ class ConfigTest extends \Codeception\Test\Unit
             verify($this->config->addDependency('file', 'dep'))->same($this->config);
         });
     }
-
-    public function testMergeWith()
-    {
-        $this->markTestIncomplete('TBD');
-    }
 }
