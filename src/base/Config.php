@@ -20,14 +20,17 @@ use ischenko\yii2\jsloader\ConfigInterface;
 abstract class Config extends Object implements ConfigInterface
 {
     /**
-     * @var \ArrayObject
-     */
-    private $_storage;
-
-    /**
      * @inheritDoc
      */
     abstract public function toArray();
+
+    /**
+     * Adds data with specified key to the configuration
+     *
+     * @param string $key
+     * @param mixed $data
+     */
+    abstract protected function addData($key, $data);
 
     /**
      * @inheritDoc
@@ -42,10 +45,10 @@ abstract class Config extends Object implements ConfigInterface
             throw new InvalidParamException('Dependencies value must be an array');
         }
 
-        $this->getStorage()->codeBlocks[] = [
+        $this->addData('jsCode', [
             'code' => $code,
-            'deps' => $dependencies
-        ];
+            'depends' => $dependencies
+        ]);
 
         return $this;
     }
@@ -63,7 +66,7 @@ abstract class Config extends Object implements ConfigInterface
             throw new InvalidParamException('Dependency name must be a string and cannot be empty');
         }
 
-        $this->getStorage()->depends[$key][] = $depends;
+        $this->addData('jsDeps', [$key => [$depends]]);
 
         return $this;
     }
@@ -85,7 +88,7 @@ abstract class Config extends Object implements ConfigInterface
 
         $key = $key ?: md5($file);
 
-        $this->getStorage()->files[$key][$file] = $options;
+        $this->addData('jsFile', [$key => [$file => $options]]);
 
         return $this;
     }
@@ -93,24 +96,8 @@ abstract class Config extends Object implements ConfigInterface
     /**
      * @inheritDoc
      */
-    public function mergeWith($config, $replace = false)
+    public function mergeWith($config)
     {
         // TODO: Implement mergeWith() method.
-    }
-
-    /**
-     * @return \ArrayObject internal storage for configuration
-     */
-    protected function getStorage()
-    {
-        if (!$this->_storage) {
-            $this->_storage = new \ArrayObject([
-                'files' => [],
-                'depends' => [],
-                'codeBlocks' => []
-            ], \ArrayObject::ARRAY_AS_PROPS);
-        }
-
-        return $this->_storage;
     }
 }

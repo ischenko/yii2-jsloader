@@ -24,4 +24,12 @@ class Config extends BaseConfig
     {
         // TODO: Implement toArray() method.
     }
+
+    /**
+     * @inheritDoc
+     */
+    protected function addData($key, $data)
+    {
+        // TODO: Implement addData() method.
+    }
 }

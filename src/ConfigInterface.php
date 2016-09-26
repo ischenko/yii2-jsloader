@@ -26,11 +26,10 @@ interface ConfigInterface
      * Merges current configuration set with given
      *
      * @param ConfigInterface|array $config configuration set to merge with
-     * @param boolean $replace if true current configuration set will be replaced instead of merge
      *
      * @return $this
      */
-    public function mergeWith($config, $replace = false);
+    public function mergeWith($config);
 
     /**
      * Adds JS file into configuration

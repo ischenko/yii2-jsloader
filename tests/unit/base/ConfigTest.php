@@ -19,13 +19,14 @@ class ConfigTest extends \Codeception\Test\Unit
         parent::_before();
     }
 
-    protected function mockConfig($params = [])
+    protected function mockConfig($params = [], $testCase = false)
     {
-        $params = array_merge([
-            'toArray' => []
+         $params = array_merge([
+            'toArray' => [],
+            'addData' => null
         ], $params);
 
-        return Stub::construct('ischenko\yii2\jsloader\base\Config', [], $params);
+        return $config = Stub::construct('ischenko\yii2\jsloader\base\Config', [], $params, $testCase);
     }
 
     /** Tests go below */
@@ -38,23 +39,9 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($loader)->isInstanceOf('ischenko\yii2\jsloader\ConfigInterface');
     }
 
-    public function testStorageGetter()
-    {
-        $config = $this->mockConfig();
-        $storage = $this->tester->getMethod($config, 'getStorage');
-        $storageObject = $storage->invoke($config);
-
-        verify($storageObject)->isInstanceOf('ArrayObject');
-        verify($storage->invoke($config))->same($storageObject);
-        verify($storageObject)->hasKey('files');
-        verify($storageObject)->hasKey('depends');
-        verify($storageObject)->hasKey('codeBlocks');
-    }
-
     public function testAddFile()
     {
         $this->config = $this->mockConfig();
-        $storageMethod = $this->tester->getMethod($this->config, 'getStorage');
 
         $this->specify('it returns self-reference', function () {
             verify($this->config->addFile('file'))->same($this->config);
@@ -87,35 +74,21 @@ class ConfigTest extends \Codeception\Test\Unit
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
-        $this->specify('it adds file to "files" section', function () use ($storageMethod) {
-            $storage = $storageMethod->invoke($this->config);
+        $this->specify('it creates config array and passes it into merge method', function ($file, $options, $key, $expected) {
+            $config = $this->mockConfig([
+                'addData' => Stub::once(function ($key, $data) use ($expected) {
+                    verify($key)->equals(array_shift($expected));
+                    verify($data)->equals(array_shift($expected));
+                })], $this);
 
-            verify($storage->files)->isEmpty();
+            $config->addFile($file, $options, $key);
 
-            $this->config->addFile('file1', [], 'test');
-
-            verify($storage->files)->notEmpty();
-            verify($storage->files)->equals(['test' => ['file1' => []]]);
-
-            $this->config->addFile('file2', ['option' => 1], 'test');
-
-            verify($storage->files)->equals(['test' => ['file1' => [], 'file2' => ['option' => 1]]]);
-
-            $this->config->addFile('1_file', [], 'test');
-
-            verify($storage->files)->equals(['test' => ['file1' => [], 'file2' => ['option' => 1], '1_file' => []]]);
-        });
-
-        $this->specify('it generates section name if key is not provided', function () use ($storageMethod) {
-            $storage = $storageMethod->invoke($this->config);
-
-            verify($storage->files)->isEmpty();
-
-            $this->config->addFile('file1');
-
-             verify($storage->files)->notEmpty();
-             verify($storage->files)->equals([md5('file1') => ['file1' => []]]);
-        });
+            $this->verifyMockObjects();
+        }, ['examples' => [
+            ['file1', [], 'test', ['jsFile', ['test' => ['file1' => []]]]],
+            ['file2', ['option' => 1], 'test', ['jsFile', ['test' => ['file2' => ['option' => 1]]]]],
+            ['file3', ['option' => 1], null, ['jsFile', [md5('file3') => ['file3' => ['option' => 1]]]]],
+        ]]);
     }
 
     public function testAddDependency()
@@ -140,20 +113,16 @@ class ConfigTest extends \Codeception\Test\Unit
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
-        $this->specify('it adds dependency to "depends" section', function () {
-            $storageMethod = $this->tester->getMethod($this->config, 'getStorage');
-            $storage = $storageMethod->invoke($this->config);
+        $this->specify('it creates config array and passes it into merge method', function () {
+            $config = $this->mockConfig([
+                'addData' => Stub::once(function ($key, $data) {
+                    verify($key)->equals('jsDeps');
+                    verify($data)->equals(['test' => ['dependency']]);
+                })], $this);
 
-            verify($storage->depends)->isEmpty();
+            $config->addDependency('test', 'dependency');
 
-            $this->config->addDependency('file1', 'test');
-
-            verify($storage->depends)->notEmpty();
-            verify($storage->depends)->equals(['file1' => ['test']]);
-
-            $this->config->addDependency('file1', 'test2');
-
-            verify($storage->depends)->equals(['file1' => ['test', 'test2']]);
+            $this->verifyMockObjects();
         });
 
         $this->specify('it returns self-reference', function () {
@@ -183,24 +152,20 @@ class ConfigTest extends \Codeception\Test\Unit
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
-        $this->specify('it adds code to "codeBlocks" section', function () {
-            $storageMethod = $this->tester->getMethod($this->config, 'getStorage');
-            $storage = $storageMethod->invoke($this->config);
+        $this->specify('it adds code to "codeBlocks" section', function ($code, $deps, $expected) {
+            $config = $this->mockConfig([
+                'addData' => Stub::once(function ($key, $data) use ($expected) {
+                    verify($key)->equals(array_shift($expected));
+                    verify($data)->equals(array_shift($expected));
+                })], $this);
 
-            verify($storage->codeBlocks)->isEmpty();
+            $config->addCodeBlock($code, $deps);
 
-            $this->config->addCodeBlock('code1', ['test']);
-
-            verify($storage->codeBlocks)->notEmpty();
-            verify($storage->codeBlocks)->equals([['code' => 'code1', 'deps' => ['test']]]);
-
-            $this->config->addCodeBlock('code2', ['test2' => 'test']);
-
-            verify($storage->codeBlocks)->equals([
-                ['code' => 'code1', 'deps' => ['test']],
-                ['code' => 'code2', 'deps' => ['test2' => 'test']]
-            ]);
-        });
+            $this->verifyMockObjects();
+        }, ['examples' => [
+            ['code1', ['test'], ['jsCode', ['code' => 'code1', 'depends' => ['test']]]],
+            ['code2', ['test2' => 'test'], ['jsCode', ['code' => 'code2', 'depends' => ['test2' => 'test']]]],
+        ]]);
 
         $this->specify('it returns self-reference', function () {
             verify($this->config->addCodeBlock('code'))->same($this->config);
