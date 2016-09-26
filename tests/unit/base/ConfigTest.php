@@ -130,48 +130,6 @@ class ConfigTest extends \Codeception\Test\Unit
         });
     }
 
-    public function testAddCodeBlock()
-    {
-        $this->config = $this->mockConfig();
-
-        $this->specify('it throws an exception if code is not a string or is an empty string', function ($key) {
-            $this->config->addCodeBlock($key);
-        }, [
-            'examples' => [
-                [['array']], [$this->config], [''], [false], [1]
-            ],
-            'throws' => 'yii\base\InvalidParamException'
-        ]);
-
-        $this->specify('it throws an exception if dependencies is not an array', function ($deps) {
-            $this->config->addCodeBlock('test', $deps);
-        }, [
-            'examples' => [
-                [$this->config], [''], [false], [1]
-            ],
-            'throws' => 'yii\base\InvalidParamException'
-        ]);
-
-        $this->specify('it adds code to "codeBlocks" section', function ($code, $deps, $expected) {
-            $config = $this->mockConfig([
-                'addData' => Stub::once(function ($key, $data) use ($expected) {
-                    verify($key)->equals(array_shift($expected));
-                    verify($data)->equals(array_shift($expected));
-                })], $this);
-
-            $config->addCodeBlock($code, $deps);
-
-            $this->verifyMockObjects();
-        }, ['examples' => [
-            ['code1', ['test'], ['jsCode', ['code' => 'code1', 'depends' => ['test']]]],
-            ['code2', ['test2' => 'test'], ['jsCode', ['code' => 'code2', 'depends' => ['test2' => 'test']]]],
-        ]]);
-
-        $this->specify('it returns self-reference', function () {
-            verify($this->config->addCodeBlock('code'))->same($this->config);
-        });
-    }
-
     public function testMergeWith()
     {
         $this->markTestIncomplete('TBD');

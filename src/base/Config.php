@@ -37,27 +37,6 @@ abstract class Config extends Object implements ConfigInterface
      *
      * @throws InvalidParamException
      */
-    public function addCodeBlock($code, $dependencies = [])
-    {
-        if (empty($code) || !is_string($code)) {
-            throw new InvalidParamException('Code must be a string and cannot be empty');
-        } elseif (!is_array($dependencies)) {
-            throw new InvalidParamException('Dependencies value must be an array');
-        }
-
-        $this->addData('jsCode', [
-            'code' => $code,
-            'depends' => $dependencies
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     *
-     * @throws InvalidParamException
-     */
     public function addDependency($key, $depends)
     {
         if (empty($key) || !is_string($key)) {

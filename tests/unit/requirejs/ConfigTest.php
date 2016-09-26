@@ -95,17 +95,6 @@ class ConfigTest extends \Codeception\Test\Unit
     {
         $this->getStorage = $this->tester->getMethod($this->config, 'getStorage');
 
-        $this->specify('it adds js code blocks into "jsCode" section of internal storage', function ($code, $opts, $expected) {
-            $storage = $this->getStorage->invoke($this->config);
-
-            verify($storage->jsCode)->isEmpty();
-            $this->config->addCodeBlock($code, $opts);
-            verify($storage->jsCode)->equals($expected);
-        }, ['examples' => [
-            ['code1', ['test'], [['code' => 'code1', 'depends' => ['test']]]],
-            ['code2', ['test2' => 'test'], [['code' => 'code2', 'depends' => ['test2' => 'test']]]],
-        ]]);
-
         $this->specify('it forwards data of jsFile section to the setPaths method', function () {
             $config = Stub::construct($this->config, [], [
                 'setPaths' => Stub::once(function ($data) {

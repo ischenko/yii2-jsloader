@@ -4,6 +4,7 @@ namespace ischenko\yii2\jsloader\tests\unit\base;
 
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\base\Loader;
+use yii\helpers\Html;
 use yii\web\AssetBundle;
 use yii\web\View;
 
@@ -42,17 +43,19 @@ class LoaderTest extends \Codeception\Test\Unit
 
     public function testConfigSetter()
     {
-        $loader = $this->tester->mockBaseLoader([
-            'getConfig' => Stub::once(function () {
-                return $this->tester->mockConfigInterface([
-                    'mergeWith' => Stub::once(function ($value) {
-                        verify($value)->equals('test');
-                    })
-                ], $this);
-            })
-        ], $this);
+        $loader = $this->tester->mockBaseLoader();
 
-        $loader->setConfig('test');
+        $loader->setConfig(['prop' => 'val']);
+
+        verify_that(property_exists($loader->getConfig(), 'prop'));
+
+        $config = clone $loader->getConfig();
+
+        $config->prop2 = 123;
+
+        $loader->setConfig($config);
+
+        verify_that(property_exists($loader->getConfig(), 'prop2'));
     }
 
     public function testRegisterAssetBundle()
@@ -207,12 +210,26 @@ class LoaderTest extends \Codeception\Test\Unit
         ];
 
         $this->specify('it collects and clears JS blocks (except head blocks) registered in the view', function () {
+            unset(
+                $this->view->js[View::POS_READY],
+                $this->view->js[View::POS_LOAD]
+            );
+
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
-                'doRender' => Stub::once(),
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addCodeBlock' => Stub::exactly(4)
-                ], $this)
+                'doRender' => Stub::once(function ($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->equals([
+                        View::POS_END => [
+                            'code' => "end code block",
+                            'depends' => []
+                        ],
+                        View::POS_BEGIN => [
+                            'code' => "begin code block",
+                            'depends' => []
+                        ],
+                    ]);
+                }),
             ], $this);
 
             $loader->processAssets();
@@ -255,14 +272,50 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addCodeBlock' => Stub::exactly(2, function ($code, $deps) {
-                        verify($deps)->contains('yii\web\JqueryAsset');
-                    })
-                ], $this)
-            ]);
+                'doRender' => Stub::once(function ($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->hasKey(View::POS_LOAD);
+                    verify($codeBlocks[View::POS_LOAD])->hasKey('depends');
+                    verify($codeBlocks[View::POS_LOAD]['depends'])->contains('yii\web\JqueryAsset');
+                    verify($codeBlocks)->hasKey(View::POS_READY);
+                    verify($codeBlocks[View::POS_READY])->hasKey('depends');
+                    verify($codeBlocks[View::POS_READY]['depends'])->contains('yii\web\JqueryAsset');
+                })
+            ], $this);
 
             $loader->processAssets();
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it adds registered js files as dependencies for code in appropriate section', function() {
+            $this->view->jsFiles = [
+                View::POS_BEGIN => [
+                    Html::jsFile('/file1.js'),
+                    Html::jsFile('/file2.js')
+                ],
+                View::POS_END => [
+                    Html::jsFile('/file3.js'),
+                    Html::jsFile('/file4.js')
+                ],
+            ];
+
+            $loader = $this->tester->mockBaseLoader([
+                'view' => $this->view,
+                'doRender' => Stub::once(function ($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->hasKey(View::POS_BEGIN);
+                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals(['/file1.js', '/file2.js']);
+                    verify($codeBlocks)->hasKey(View::POS_END);
+                    verify($codeBlocks[View::POS_END])->hasKey('depends');
+                    verify($codeBlocks[View::POS_END]['depends'])->equals(['/file3.js', '/file4.js']);
+                })
+            ], $this);
+
+            $loader->processAssets();
+
+            verify($this->view->jsFiles)->equals([]);
 
             $this->verifyMockObjects();
         });
@@ -276,12 +329,13 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addCodeBlock' => Stub::once(function ($code) {
-                        verify($code)->equals("jQuery(window).load(function () {\nload code block\n});");
-                    })
-                ], $this)
-            ]);
+                'doRender' => Stub::once(function($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->hasKey(View::POS_LOAD);
+                    verify($codeBlocks[View::POS_LOAD])->hasKey('code');
+                    verify($codeBlocks[View::POS_LOAD]['code'])->equals("jQuery(window).load(function () {\nload code block\n});");
+                })
+            ], $this);
 
             $loader->processAssets();
 
@@ -297,12 +351,13 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addCodeBlock' => Stub::once(function ($code) {
-                        verify($code)->equals("jQuery(document).ready(function () {\nready code block\n});");
-                    })
-                ], $this)
-            ]);
+                'doRender' => Stub::once(function($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->hasKey(View::POS_READY);
+                    verify($codeBlocks[View::POS_READY])->hasKey('code');
+                    verify($codeBlocks[View::POS_READY]['code'])->equals("jQuery(document).ready(function () {\nready code block\n});");
+                })
+            ], $this);
 
             $loader->processAssets();
 

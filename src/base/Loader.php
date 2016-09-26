@@ -48,8 +48,10 @@ abstract class Loader extends Object implements LoaderInterface
 
     /**
      * Performs actual rendering of the JS loader
+     *
+     * @param array $jsCodeBlocks a list of js code blocks indexed by position
      */
-    abstract protected function doRender();
+    abstract protected function doRender($jsCodeBlocks);
 
     /**
      * @inheritDoc
@@ -109,41 +111,54 @@ abstract class Loader extends Object implements LoaderInterface
     {
         $view = $this->getView();
 
-        $codeBlockSections = [
+        $codeBlockPositions = [
             View::POS_BEGIN,
             View::POS_END,
             View::POS_LOAD,
             View::POS_READY
         ];
 
-        $config = $this->getConfig();
+        $jsCodeBlocks = [];
 
-        foreach ($codeBlockSections as $section) {
-            if (empty($view->js[$section])) {
+        foreach ($codeBlockPositions as $position) {
+            if (empty($view->js[$position])) {
                 continue;
             }
 
-            $dependencies = [];
-            $codeBlock = implode("\n", $view->js[$section]);
+            $depends = [];
+            $codeBlock = implode("\n", $view->js[$position]);
 
-            if ($section == View::POS_LOAD || $section == View::POS_READY) {
-                $dependencies[] = JqueryAsset::className();
+            if ($position == View::POS_LOAD || $position == View::POS_READY) {
+                $depends[] = JqueryAsset::className();
 
-                if ($section == View::POS_LOAD) {
+                if ($position == View::POS_LOAD) {
                     $codeBlock = "jQuery(window).load(function () {\n{$codeBlock}\n});";
                 }
 
-                if ($section == View::POS_READY) {
+                if ($position == View::POS_READY) {
                     $codeBlock = "jQuery(document).ready(function () {\n{$codeBlock}\n});";
                 }
             }
 
-            $config->addCodeBlock($codeBlock, $dependencies);
+            if (isset($view->jsFiles[$position])) {
+                foreach ($view->jsFiles[$position] as $jsFile) {
+                    if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $m_)) {
+                        $depends[] = $m_[2];
+                    }
+                }
 
-            unset($view->js[$section]);
+                unset($view->jsFiles[$position]);
+            }
+
+            $jsCodeBlocks[$position] = [
+                'code' => $codeBlock,
+                'depends' => $depends
+            ];
+
+            unset($view->js[$position]);
         }
 
-        $this->doRender();
+        $this->doRender($jsCodeBlocks);
     }
 
     /**
@@ -151,6 +166,6 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function setConfig($config)
     {
-        $this->getConfig()->mergeWith($config);
+        \Yii::configure($this->getConfig(), $config);
     }
 }

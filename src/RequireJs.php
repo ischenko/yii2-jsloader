@@ -38,7 +38,7 @@ class RequireJs extends Loader
     /**
      * @inheritDoc
      */
-    protected function doRender()
+    protected function doRender($jsCodeBlocks)
     {
         // TODO: Implement render() method.
     }

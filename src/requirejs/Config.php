@@ -110,13 +110,7 @@ class Config extends BaseConfig
      */
     protected function addData($key, $data)
     {
-        $storage = $this->getStorage();
-
         switch ($key) {
-            case 'jsCode':
-                $storage->jsCode[] = $data;
-                break;
-
             case 'jsDeps':
                 $data = array_map(function ($deps) {
                     return ['deps' => (array)$deps];

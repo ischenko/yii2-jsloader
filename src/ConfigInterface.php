@@ -43,14 +43,6 @@ interface ConfigInterface
     public function addFile($file, $options = [], $key = null);
 
     /**
-     * Adds JS code block into configuration
-     *
-     * @param string $code content of JS code to be added
-     * @param array $dependencies a list of dependencies for the block
-     */
-    public function addCodeBlock($code, $dependencies = []);
-
-    /**
      * Adds dependency for section
      *
      * @param string $key section name to add dependency to
