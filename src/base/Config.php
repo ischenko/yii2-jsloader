@@ -88,7 +88,7 @@ abstract class Config extends Object implements ConfigInterface
 
         $key = $key ?: md5($file);
 
-        $this->addData('jsFile', [$key => [$file => $options]]);
+        $this->addData('jsFile', [$key => [$file, $options]]);
 
         return $this;
     }

@@ -85,9 +85,9 @@ class ConfigTest extends \Codeception\Test\Unit
 
             $this->verifyMockObjects();
         }, ['examples' => [
-            ['file1', [], 'test', ['jsFile', ['test' => ['file1' => []]]]],
-            ['file2', ['option' => 1], 'test', ['jsFile', ['test' => ['file2' => ['option' => 1]]]]],
-            ['file3', ['option' => 1], null, ['jsFile', [md5('file3') => ['file3' => ['option' => 1]]]]],
+            ['file1', [], 'test', ['jsFile', ['test' => ['file1', []]]]],
+            ['file2', ['option' => 1], 'test', ['jsFile', ['test' => ['file2', ['option' => 1]]]]],
+            ['file3', ['option' => 1], null, ['jsFile', [md5('file3') => ['file3', ['option' => 1]]]]],
         ]]);
     }
 
