@@ -18,7 +18,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "yiisoft/yii2": "~2.0"
+    "yiisoft/yii2": "~2.0",
+    "bower-asset/requirejs": "~2.3"
   },
   "require-dev": {
     "codeception/verify": "*",

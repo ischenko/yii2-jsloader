@@ -51,7 +51,7 @@ abstract class Loader extends Object implements LoaderInterface
      *
      * @param array $jsCodeBlocks a list of js code blocks indexed by position
      */
-    abstract protected function doRender($jsCodeBlocks);
+    abstract protected function doRender(array $jsCodeBlocks);
 
     /**
      * @inheritDoc
@@ -121,26 +121,28 @@ abstract class Loader extends Object implements LoaderInterface
         $jsCodeBlocks = [];
 
         foreach ($codeBlockPositions as $position) {
-            if (empty($view->js[$position])) {
-                continue;
-            }
-
             $depends = [];
-            $codeBlock = implode("\n", $view->js[$position]);
+            $codeBlock = '';
 
-            if ($position == View::POS_LOAD || $position == View::POS_READY) {
-                $depends[] = JqueryAsset::className();
+            if (!empty($view->js[$position])) {
+                $codeBlock = implode("\n", $view->js[$position]);
 
-                if ($position == View::POS_LOAD) {
-                    $codeBlock = "jQuery(window).load(function () {\n{$codeBlock}\n});";
+                if ($position == View::POS_LOAD || $position == View::POS_READY) {
+                    $depends[] = JqueryAsset::className();
+
+                    if ($position == View::POS_LOAD) {
+                        $codeBlock = "jQuery(window).load(function () {\n{$codeBlock}\n});";
+                    }
+
+                    if ($position == View::POS_READY) {
+                        $codeBlock = "jQuery(document).ready(function () {\n{$codeBlock}\n});";
+                    }
                 }
 
-                if ($position == View::POS_READY) {
-                    $codeBlock = "jQuery(document).ready(function () {\n{$codeBlock}\n});";
-                }
+                unset($view->js[$position]);
             }
 
-            if (isset($view->jsFiles[$position])) {
+            if (!empty($view->jsFiles[$position])) {
                 foreach ($view->jsFiles[$position] as $jsFile) {
                     if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $m_)) {
                         $depends[] = $m_[2];
@@ -150,12 +152,14 @@ abstract class Loader extends Object implements LoaderInterface
                 unset($view->jsFiles[$position]);
             }
 
+            if (empty($codeBlock) && empty($depends)) {
+                continue;
+            }
+
             $jsCodeBlocks[$position] = [
                 'code' => $codeBlock,
                 'depends' => $depends
             ];
-
-            unset($view->js[$position]);
         }
 
         $this->doRender($jsCodeBlocks);

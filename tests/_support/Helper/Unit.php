@@ -14,15 +14,15 @@ class Unit extends \Codeception\Module
     /**
      * @return View
      */
-    public function mockView()
+    public function mockView($params = [], $testCase = false)
     {
-        return new View([
+        return Stub::construct('yii\web\View', [], array_merge([
             'assetManager' => Stub::makeEmpty(AssetManager::className(), [
                 'getAssetUrl' => function ($bundle, $asset) {
                     return $asset;
                 }
             ])
-        ]);
+        ], $params), $testCase);
     }
 
     /**
