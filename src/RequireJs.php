@@ -20,13 +20,17 @@ use yii\web\View;
  */
 class RequireJs extends Loader
 {
-    const LIBRARY_PATH = '@bower/requirejs/require.js';
     const RUNTIME_PATH = '@runtime/jsloader';
 
     /**
      * @var string URL to be used to load the RequireJS library. If value is empty the loader will publish library from the bower package
      */
     public $libraryUrl;
+
+    /**
+     * @var string path to the RequireJS library
+     */
+    public $libraryPath = '@bower/requirejs/require.js';
 
     /**
      * @see http://requirejs.org/docs/api.html#data-main
@@ -81,7 +85,7 @@ class RequireJs extends Loader
         $am = $view->getAssetManager();
 
         if (empty($this->libraryUrl)) {
-            list(, $this->libraryUrl) = $am->publish(self::LIBRARY_PATH);
+            list(, $this->libraryUrl) = $am->publish($this->libraryPath);
         }
 
         $requireOptions = ['position' => View::POS_END];
