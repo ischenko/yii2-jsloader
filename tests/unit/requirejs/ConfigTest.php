@@ -29,9 +29,18 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($this->config)->isInstanceOf('ischenko\yii2\jsloader\requirejs\Config');
     }
 
+    /**
+     * @depends testBuild
+     */
     public function testToArray()
     {
-        $this->markTestIncomplete('TBD');
+        $config = Stub::make($this->config, [
+            'build' => Stub::once(function() {
+                return new \ArrayObject();
+            })
+        ], $this);
+
+        verify($config->toArray())->internalType('array');
     }
 
     public function testStorageGetter()
@@ -95,31 +104,42 @@ class ConfigTest extends \Codeception\Test\Unit
     {
         $this->getStorage = $this->tester->getMethod($this->config, 'getStorage');
 
-        $this->specify('it forwards data of jsFile section to the setPaths method', function () {
-            $config = Stub::construct($this->config, [], [
-                'setPaths' => Stub::once(function ($data) {
-                    verify($data)->hasKey('test');
-                    verify($data['test'])->equals('file1');
-                })
-            ], $this);
+        $this->specify('it inserts incoming js file into internal storage', function () {
+            $storage = $this->getStorage->invoke($this->config);
 
-            $config->addFile('file1.js', [], 'test');
+            verify($storage)->hasntKey('jsFiles');
+
+            $this->config->addFile('file1.js', [], 'test');
+
+            verify($storage)->hasKey('jsFiles');
+            verify($storage->jsFiles)->equals(['test' => ['file1.js' => []]]);
+
+            $this->config->addFile('file2.js', ['option' => 1], 'test');
+
+            verify($storage->jsFiles)->equals(['test' => ['file1.js' => [], 'file2.js' => ['option' => 1]]]);
+
+            $this->config->addFile('file3.js', ['option' => 1]);
+
+            verify($storage->jsFiles)->equals([
+                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
+                md5('file3.js') => ['file3.js' => ['option' => 1]]
+            ]);
+
+            $this->config->addFile('file3.js', ['option' => 1]);
+
+            verify($storage->jsFiles)->equals([
+                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
+                md5('file3.js') => ['file3.js' => ['option' => 1]]
+            ]);
+
+            $this->config->addFile('file2.js', ['option' => 1], 'test');
+
+            verify($storage->jsFiles)->equals([
+                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
+                md5('file3.js') => ['file3.js' => ['option' => 1]]
+            ]);
 
             $this->verifyMockObjects();
-        });
-
-        $this->specify('it shifts a file from the paths section to the shim section as a dependency for the new file', function () {
-            $config = $this->config;
-
-            $config->addFile('file1.js', [], 'test');
-
-            verify($config->getPaths())->equals(['test' => 'file1']);
-            verify($config->getShim())->equals([]);
-
-            $config->addFile('file2.js', [], 'test');
-
-            verify($config->getPaths())->equals(['test' => 'file2']);
-            verify($config->getShim())->equals(['test' => ['deps' => ['file1']]]);
         });
 
         $this->specify('it transforms and forwards data of jsDeps section to the setShim method', function () {
@@ -133,6 +153,57 @@ class ConfigTest extends \Codeception\Test\Unit
             $config->addDependency('test', 'dep');
 
             $this->verifyMockObjects();
+        });
+    }
+
+    public function testBuild()
+    {
+        $build = $this->tester->getMethod($this->config, 'build');
+        $getStorage = $this->tester->getMethod($this->config, 'getStorage');
+
+        verify($build->invoke($this->config))->isInstanceOf('ArrayObject');
+        verify($build->invoke($this->config))->same($getStorage->invoke($this->config));
+
+        $storage = $getStorage->invoke($this->config);
+
+        $storage->jsFiles = ['test' => []];
+
+        $build->invoke($this->config);
+
+        verify('It removes jsFiles section', $storage)->hasntKey('jsFiles');
+
+        $this->specify('it adds files into the paths configuration without ".js" extension', function() {
+            $storage = $this->tester->getMethod($this->config, 'getStorage')->invoke($this->config);
+
+            $storage->jsFiles = [
+                'test' => ['file1.js' => []],
+                'test2' => ['file2.js' => []],
+                'test3' => ['file3.sj' => []]
+            ];
+
+            $this->tester->getMethod($this->config, 'build')->invoke($this->config);
+
+            verify($storage)->hasKey('paths');
+            verify($storage->paths)->equals(['test' => 'file1', 'test2' => 'file2', 'test3' => 'file3.sj']);
+        });
+
+        $this->specify('it shifts file into dependencies if there is another file for the same section', function() {
+            $storage = $this->tester->getMethod($this->config, 'getStorage')->invoke($this->config);
+
+            $storage->jsFiles = [
+                'test' => [
+                    'file1.js' => [],
+                    'file2.js' => [],
+                ],
+            ];
+
+            $this->tester->getMethod($this->config, 'build')->invoke($this->config);
+
+            verify($storage)->hasKey('paths');
+            verify($storage->paths)->equals(['test' => 'file2']);
+
+            verify($storage)->hasKey('shim');
+            verify($storage->shim)->equals(['test' => ['deps' => ['file1']]]);
         });
     }
 }

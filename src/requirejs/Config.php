@@ -28,7 +28,7 @@ class Config extends BaseConfig
      */
     public function toArray()
     {
-        // TODO: Implement toArray() method.
+        return $this->build()->getArrayCopy();
     }
 
     /**
@@ -106,6 +106,38 @@ class Config extends BaseConfig
     }
 
     /**
+     * Builds configuration for requirejs
+     *
+     * @return \ArrayObject reference on internal storage
+     */
+    protected function build()
+    {
+        $storage = $this->getStorage();
+
+        if (isset($storage->jsFiles)) {
+            foreach ($storage->jsFiles as $key => $files) {
+                $depends = [];
+
+                foreach ($files as $file => $options) {
+                    if (isset($storage->paths[$key])) {
+                        $depends[] = $storage->paths[$key];
+                    }
+
+                    $storage->paths[$key] = preg_replace('/\.js$/', '', $file);
+                }
+
+                if ($depends !== []) {
+                    $this->setShim([$key => ['deps' => $depends]]);
+                }
+            }
+
+            unset($storage->jsFiles);
+        }
+
+        return $storage;
+    }
+
+    /**
      * @inheritDoc
      */
     protected function addData($key, $data)
@@ -120,26 +152,15 @@ class Config extends BaseConfig
                 break;
 
             case 'jsFile':
-                $paths = $this->getPaths();
+                $storage = $this->getStorage();
 
-                foreach ($data as $key => $data_) {
-                    $jsFile = array_shift($data_);
-                    $jsFile = rtrim($jsFile, '.js');
-
-                    if (!isset($paths[$key])) {
-                        $paths[$key] = $jsFile;
-                        continue;
+                foreach ($data as $name => $files) {
+                    if (!isset($storage->jsFiles[$name])) {
+                        $storage->jsFiles[$name] = $files;
+                    } else {
+                        $storage->jsFiles[$name] = array_merge($storage->jsFiles[$name], $files);
                     }
-
-                    // move file from paths to shim
-                    $this->setShim([$key => [
-                        'deps' => (array)$paths[$key]]
-                    ]);
-
-                    $paths[$key] = $jsFile;
                 }
-
-                $this->setPaths($paths, false);
                 break;
         }
     }

@@ -162,12 +162,19 @@ class RequireJsTest extends \Codeception\Test\Unit
         });
 
         $this->specify('it registers previously rendered JS code', function() {
+            $data = [
+                [View::POS_END, "code"],
+                [View::POS_HEAD, "var requirejs = {};"]
+            ];
+
             $loader = $this->mockLoader([
                 'main' => false,
                 'view' => $this->tester->mockView([
-                    'registerJs' => Stub::once(function($code, $position) {
-                        verify($position)->equals(View::POS_END);
-                        verify($code)->equals("code");
+                    'registerJs' => Stub::exactly(2, function($code, $position) use (&$data) {
+                        $expected = array_shift($data);
+
+                        verify($position)->equals($expected[0]);
+                        verify($code)->equals($expected[1]);
                     }),
                     'assetManager' => Stub::makeEmpty('yii\web\AssetManager', [
                         'publish' => Stub::once(function () {
@@ -189,7 +196,7 @@ class RequireJsTest extends \Codeception\Test\Unit
             $loader = $this->mockLoader([
                 'libraryUrl' => '/require.js',
                 'view' => $this->tester->mockView([
-                    'registerJs' => Stub::never(),
+                    'registerJs' => Stub::once(),
                     'registerJsFile' => Stub::once(function($file, $options) {
                         verify($file)->equals('/require.js');
                         verify($options)->hasKey('position');
@@ -213,5 +220,33 @@ class RequireJsTest extends \Codeception\Test\Unit
 
             $this->verifyMockObjects();
         });
+    }
+
+    /**
+     * @dataProvider providerRenderRequireConfigOptions
+     */
+    public function testRenderRequireConfig($config, $expected)
+    {
+        $loader = $this->mockLoader([
+            'getConfig' => Stub::once(function() use ($config) {
+                return $this->tester->mockConfigInterface([
+                    'toArray' => Stub::once(function() use ($config) {
+                        return $config;
+                    })
+                ], $this);
+            })
+        ], $this);
+
+        verify($this->tester->getMethod($loader, 'renderRequireConfig')->invoke($loader))->equals($expected);
+    }
+
+    public function providerRenderRequireConfigOptions()
+    {
+        return [
+            [[], 'var requirejs = {};'],
+            [['paths' => []], 'var requirejs = {};'],
+            [['paths' => ['test' => 'file']], 'var requirejs = {"paths":{"test":"file"}};'],
+            [['paths' => ['test' => 'file'], 'shim' => ['test' => ['deps' => ['file2']]]], 'var requirejs = {"paths":{"test":"file"},"shim":{"test":{"deps":["file2"]}}};'],
+        ];
     }
 }

@@ -10,6 +10,7 @@ namespace ischenko\yii2\jsloader;
 use ischenko\yii2\jsloader\base\Loader;
 use ischenko\yii2\jsloader\requirejs\Config;
 use yii\helpers\FileHelper;
+use yii\helpers\Json;
 use yii\web\View;
 
 /**
@@ -91,13 +92,27 @@ class RequireJs extends Loader
         $requireOptions = ['position' => View::POS_END];
 
         if ($this->main === false) {
-            $view->registerJs($code, View::POS_END);
+            $view->registerJs($code, $requireOptions['position']);
         } else {
             $mainPath = $this->writeFileContent('requirejs-main.js', $code);
             list(, $requireOptions['data-main']) = $am->publish($mainPath);
         }
 
         $view->registerJsFile($this->libraryUrl, $requireOptions);
+        $view->registerJs($this->renderRequireConfig(), View::POS_HEAD);
+    }
+
+    /**
+     * Performs rendering of configuration block for RequireJS
+     *
+     * @return string
+     */
+    protected function renderRequireConfig()
+    {
+        $config = $this->getConfig()->toArray();
+        $config = Json::encode((object)array_filter($config));
+
+        return str_replace(':config', $config, 'var requirejs = :config;');
     }
 
     /**
@@ -166,7 +181,7 @@ class RequireJs extends Loader
         if (file_put_contents($filePath, $content, LOCK_EX) === false) {
             throw new \yii\base\Exception("Failed to write data into a file \"$filePath\"");
         }
-        
+
         return $filePath;
     }
 }

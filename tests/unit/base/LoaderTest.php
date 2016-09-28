@@ -288,7 +288,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
 
-        $this->specify('it adds registered js files as dependencies for code in appropriate section', function() {
+        $this->specify('it generates keys for registered js files and adds them as dependencies for appropriate code block', function() {
             $this->view->jsFiles = [
                 View::POS_BEGIN => [
                     Html::jsFile('/file1.js'),
@@ -302,14 +302,17 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addFile' => Stub::exactly(4)
+                ], $this),
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
                     verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
-                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals(['/file1.js', '/file2.js']);
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([md5('/file1.js'), md5('/file2.js')]);
                     verify($codeBlocks)->hasKey(View::POS_END);
                     verify($codeBlocks[View::POS_END])->hasKey('depends');
-                    verify($codeBlocks[View::POS_END]['depends'])->equals(['/file3.js', '/file4.js']);
+                    verify($codeBlocks[View::POS_END]['depends'])->equals([md5('/file3.js'), md5('/file4.js')]);
                 })
             ], $this);
 

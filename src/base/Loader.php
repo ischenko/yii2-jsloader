@@ -115,18 +115,17 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function processAssets()
     {
-        $view = $this->getView();
-
-        $codeBlockPositions = [
-            View::POS_BEGIN,
-            View::POS_END,
-            View::POS_LOAD,
-            View::POS_READY
-        ];
-
         $jsCodeBlocks = [];
 
-        foreach ($codeBlockPositions as $position) {
+        $view = $this->getView();
+        $config = $this->getConfig();
+
+        foreach ([
+                     View::POS_BEGIN,
+                     View::POS_END,
+                     View::POS_LOAD,
+                     View::POS_READY
+                 ] as $position) {
             $depends = [];
             $codeBlock = '';
 
@@ -151,7 +150,8 @@ abstract class Loader extends Object implements LoaderInterface
             if (!empty($view->jsFiles[$position])) {
                 foreach ($view->jsFiles[$position] as $jsFile) {
                     if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $m_)) {
-                        $depends[] = $m_[2];
+                        $depends[] = $key_ = $this->generateKey($m_[2]);
+                        $config->addFile($m_[2], ['position' => $position], $key_);
                     }
                 }
 
@@ -177,5 +177,17 @@ abstract class Loader extends Object implements LoaderInterface
     public function setConfig($config)
     {
         \Yii::configure($this->getConfig(), $config);
+    }
+
+    /**
+     * Performs key generation for given content
+     *
+     * @param string $content
+     *
+     * @return string
+     */
+    protected function generateKey($content)
+    {
+        return md5($content);
     }
 }
