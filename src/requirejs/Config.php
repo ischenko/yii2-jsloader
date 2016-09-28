@@ -19,11 +19,6 @@ use \ischenko\yii2\jsloader\base\Config as BaseConfig;
 class Config extends BaseConfig
 {
     /**
-     * @var \ArrayObject
-     */
-    private $_storage;
-
-    /**
      * @inheritDoc
      */
     public function toArray()
@@ -135,45 +130,5 @@ class Config extends BaseConfig
         }
 
         return $storage;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function addData($key, $data)
-    {
-        switch ($key) {
-            case 'jsDeps':
-                $data = array_map(function ($deps) {
-                    return ['deps' => (array)$deps];
-                }, $data);
-
-                $this->setShim($data);
-                break;
-
-            case 'jsFile':
-                $storage = $this->getStorage();
-
-                foreach ($data as $name => $files) {
-                    if (!isset($storage->jsFiles[$name])) {
-                        $storage->jsFiles[$name] = $files;
-                    } else {
-                        $storage->jsFiles[$name] = array_merge($storage->jsFiles[$name], $files);
-                    }
-                }
-                break;
-        }
-    }
-
-    /**
-     * @return \ArrayObject an object that used as internal storage
-     */
-    protected function getStorage()
-    {
-        if (!$this->_storage) {
-            $this->_storage = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
-        }
-
-        return $this->_storage;
     }
 }

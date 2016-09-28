@@ -20,17 +20,14 @@ use ischenko\yii2\jsloader\ConfigInterface;
 abstract class Config extends Object implements ConfigInterface
 {
     /**
+     * @var \ArrayObject
+     */
+    private $_storage;
+
+    /**
      * @inheritDoc
      */
     abstract public function toArray();
-
-    /**
-     * Adds data with specified key to the configuration
-     *
-     * @param string $key
-     * @param mixed $data
-     */
-    abstract protected function addData($key, $data);
 
     /**
      * @inheritDoc
@@ -45,7 +42,14 @@ abstract class Config extends Object implements ConfigInterface
             throw new InvalidParamException('Dependency name must be a string or array');
         }
 
-        $this->addData('jsDeps', [$key => (array)$depends]);
+        $depends = (array)$depends;
+        $storage = $this->getStorage();
+
+        if (!isset($storage->jsDeps[$key])) {
+            $storage->jsDeps[$key] = $depends;
+        } else {
+            $storage->jsDeps[$key] = array_merge($storage->jsDeps[$key], $depends);
+        }
 
         return $this;
     }
@@ -67,8 +71,28 @@ abstract class Config extends Object implements ConfigInterface
 
         $key = $key ?: md5($file);
 
-        $this->addData('jsFile', [$key => [$file => $options]]);
+        $storage = $this->getStorage();
+        $jsFile = [$file => $options];
+
+        if (!isset($storage->jsFiles[$key])) {
+            $storage->jsFiles[$key] = $jsFile;
+        } else {
+            $storage->jsFiles[$key] = array_merge($storage->jsFiles[$key], $jsFile);
+        }
 
         return $this;
+    }
+
+
+    /**
+     * @return \ArrayObject an object that used as internal storage
+     */
+    protected function getStorage()
+    {
+        if (!$this->_storage) {
+            $this->_storage = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+        }
+
+        return $this->_storage;
     }
 }

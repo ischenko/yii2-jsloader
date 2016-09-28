@@ -61,16 +61,16 @@ class RequireJsTest extends \Codeception\Test\Unit
 
         verify($renderRequireBlock->invokeArgs($loader, ['', []]))->equals('');
         verify($renderRequireBlock->invokeArgs($loader, ['test;', []]))
-            ->equals("requirejs([], function() {\ntest;\n});");
+            ->equals("require([], function() {\ntest;\n});");
 
         verify($renderRequireBlock->invokeArgs($loader, ['test;', ['test']]))
-            ->equals("requirejs([\"test\"], function() {\ntest;\n});");
+            ->equals("require([\"test\"], function() {\ntest;\n});");
 
         verify($renderRequireBlock->invokeArgs($loader, ['test;', ['test' => 'testing']]))
-            ->equals("requirejs([\"test\"], function(testing) {\ntest;\n});");
+            ->equals("require([\"test\"], function(testing) {\ntest;\n});");
 
         verify($renderRequireBlock->invokeArgs($loader, ['test;', ['test' => 'testing', 'test2']]))
-            ->equals("requirejs([\"test\", \"test2\"], function(testing) {\ntest;\n});");
+            ->equals("require([\"test\",\"test2\"], function(testing) {\ntest;\n});");
     }
 
     public function testDoRender()
@@ -164,7 +164,7 @@ class RequireJsTest extends \Codeception\Test\Unit
         $this->specify('it registers previously rendered JS code', function() {
             $data = [
                 [View::POS_END, "code"],
-                [View::POS_HEAD, "var requirejs = {};"]
+                [View::POS_HEAD, "var require = {};"]
             ];
 
             $loader = $this->mockLoader([
@@ -243,10 +243,10 @@ class RequireJsTest extends \Codeception\Test\Unit
     public function providerRenderRequireConfigOptions()
     {
         return [
-            [[], 'var requirejs = {};'],
-            [['paths' => []], 'var requirejs = {};'],
-            [['paths' => ['test' => 'file']], 'var requirejs = {"paths":{"test":"file"}};'],
-            [['paths' => ['test' => 'file'], 'shim' => ['test' => ['deps' => ['file2']]]], 'var requirejs = {"paths":{"test":"file"},"shim":{"test":{"deps":["file2"]}}};'],
+            [[], 'var require = {};'],
+            [['paths' => []], 'var require = {};'],
+            [['paths' => ['test' => 'file']], 'var require = {"paths":{"test":"file"}};'],
+            [['paths' => ['test' => 'file'], 'shim' => ['test' => ['deps' => ['file2']]]], 'var require = {"paths":{"test":"file"},"shim":{"test":{"deps":["file2"]}}};'],
         ];
     }
 }

@@ -43,15 +43,6 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($config->toArray())->internalType('array');
     }
 
-    public function testStorageGetter()
-    {
-        $getStorage = $this->tester->getMethod($this->config, 'getStorage');
-        $storage = $getStorage->invoke($this->config);
-
-        verify($storage)->isInstanceOf('ArrayObject');
-        verify($storage)->same($getStorage->invoke($this->config));
-    }
-
     public function testPathsSetter()
     {
         $this->getStorage = $this->tester->getMethod($this->config, 'getStorage');
@@ -59,12 +50,12 @@ class ConfigTest extends \Codeception\Test\Unit
 
         verify($storage)->hasntKey('paths');
 
-        $this->config->setPaths(['test' => ['test.js']]);
+        $this->config->setPaths(['test' => ['test.js']], true);
 
         verify($storage)->hasKey('paths');
         verify($storage->paths)->equals(['test' => ['test.js']]);
 
-        $this->config->setPaths(['test' => ['test2.js']]);
+        $this->config->setPaths(['test' => ['test2.js']], true);
         verify($storage->paths)->equals(['test' => ['test.js', 'test2.js']]);
 
         $this->config->setPaths(['test' => ['test2.js']], false);
@@ -73,7 +64,7 @@ class ConfigTest extends \Codeception\Test\Unit
         $this->config->setPaths(['test' => 'test2.js'], false);
         verify($storage->paths)->equals(['test' => 'test2.js']);
 
-        $this->config->setPaths(['test' => 'test3.js']);
+        $this->config->setPaths(['test' => 'test3.js'], true);
         verify($storage->paths)->equals(['test' => 'test3.js']);
 
         verify($this->config->setPaths([]))->same($this->config);
@@ -86,74 +77,18 @@ class ConfigTest extends \Codeception\Test\Unit
 
         verify($storage)->hasntKey('shim');
 
-        $this->config->setShim(['test' => ['deps' => ['test.js']]]);
+        $this->config->setShim(['test' => ['deps' => ['test.js']]], true);
 
         verify($storage)->hasKey('shim');
         verify($storage->shim)->equals(['test' => ['deps' => ['test.js']]]);
 
-        $this->config->setShim(['test' => ['deps' => ['test2.js']]]);
+        $this->config->setShim(['test' => ['deps' => ['test2.js']]], true);
         verify($storage->shim)->equals(['test' => ['deps' => ['test.js', 'test2.js']]]);
 
         $this->config->setShim(['test' => ['deps' => ['test3.js']]], false);
         verify($storage->shim)->equals(['test' => ['deps' => ['test3.js']]]);
 
         verify($this->config->setShim([]))->same($this->config);
-    }
-
-    public function testAddData()
-    {
-        $this->getStorage = $this->tester->getMethod($this->config, 'getStorage');
-
-        $this->specify('it inserts incoming js file into internal storage', function () {
-            $storage = $this->getStorage->invoke($this->config);
-
-            verify($storage)->hasntKey('jsFiles');
-
-            $this->config->addFile('file1.js', [], 'test');
-
-            verify($storage)->hasKey('jsFiles');
-            verify($storage->jsFiles)->equals(['test' => ['file1.js' => []]]);
-
-            $this->config->addFile('file2.js', ['option' => 1], 'test');
-
-            verify($storage->jsFiles)->equals(['test' => ['file1.js' => [], 'file2.js' => ['option' => 1]]]);
-
-            $this->config->addFile('file3.js', ['option' => 1]);
-
-            verify($storage->jsFiles)->equals([
-                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
-                md5('file3.js') => ['file3.js' => ['option' => 1]]
-            ]);
-
-            $this->config->addFile('file3.js', ['option' => 1]);
-
-            verify($storage->jsFiles)->equals([
-                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
-                md5('file3.js') => ['file3.js' => ['option' => 1]]
-            ]);
-
-            $this->config->addFile('file2.js', ['option' => 1], 'test');
-
-            verify($storage->jsFiles)->equals([
-                'test' => ['file1.js' => [], 'file2.js' => ['option' => 1]],
-                md5('file3.js') => ['file3.js' => ['option' => 1]]
-            ]);
-
-            $this->verifyMockObjects();
-        });
-
-        $this->specify('it transforms and forwards data of jsDeps section to the setShim method', function () {
-            $config = Stub::construct($this->config, [], [
-                'setShim' => Stub::once(function ($data) {
-                    verify($data)->hasKey('test');
-                    verify($data['test'])->equals(['deps' => ['dep']]);
-                })
-            ], $this);
-
-            $config->addDependency('test', 'dep');
-
-            $this->verifyMockObjects();
-        });
     }
 
     public function testBuild()

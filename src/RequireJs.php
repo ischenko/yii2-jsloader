@@ -47,6 +47,8 @@ class RequireJs extends Loader
 
     /**
      * @inheritDoc
+     *
+     * @return Config
      */
     public function getConfig()
     {
@@ -71,7 +73,8 @@ class RequireJs extends Loader
                 continue;
             }
 
-            $jsCode = $this->renderRequireBlock("{$jsCodeBlock['code']}\n{$jsCode}", $jsCodeBlock['depends']);
+            $jsCode = "{$jsCodeBlock['code']}\n{$jsCode}";
+            $jsCode = $this->renderRequireBlock($jsCode, $jsCodeBlock['depends']);
         }
 
         $this->publishRequireJs($jsCode);
@@ -112,7 +115,7 @@ class RequireJs extends Loader
         $config = $this->getConfig()->toArray();
         $config = Json::encode((object)array_filter($config));
 
-        return str_replace(':config', $config, 'var requirejs = :config;');
+        return str_replace(':config', $config, 'var require = :config;');
     }
 
     /**
@@ -153,10 +156,10 @@ class RequireJs extends Loader
                 ':modules'
             ],
             [
-                implode(', ', $injects),
-                implode(', ', array_map(['yii\helpers\Json', 'encode'], $modules))
+                implode(',', $injects),
+                implode(',', array_map(['yii\helpers\Json', 'encode'], $modules))
             ],
-            "requirejs([:modules], function(:injects) {\n{$code}\n});"
+            "require([:modules], function(:injects) {\n{$code}\n});"
         );
     }
 

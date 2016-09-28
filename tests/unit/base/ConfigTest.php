@@ -22,8 +22,7 @@ class ConfigTest extends \Codeception\Test\Unit
     protected function mockConfig($params = [], $testCase = false)
     {
          $params = array_merge([
-            'toArray' => [],
-            'addData' => null
+            'toArray' => []
         ], $params);
 
         return $config = Stub::construct('ischenko\yii2\jsloader\base\Config', [], $params, $testCase);
@@ -74,20 +73,22 @@ class ConfigTest extends \Codeception\Test\Unit
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
-        $this->specify('it creates config array and passes it into merge method', function ($file, $options, $key, $expected) {
-            $config = $this->mockConfig([
-                'addData' => Stub::once(function ($key, $data) use ($expected) {
-                    verify($key)->equals(array_shift($expected));
-                    verify($data)->equals(array_shift($expected));
-                })], $this);
+        $this->specify('it inserts file data into the internal storage', function ($file, $options, $key, $expected) {
+            $storage = $this->tester->getMethod($this->config, 'getStorage')->invoke($this->config);
 
-            $config->addFile($file, $options, $key);
+            verify($storage)->hasntKey('jsFiles');
 
-            $this->verifyMockObjects();
+            foreach ((array)$file as $file_) {
+                $this->config->addFile($file_, $options, $key);
+            }
+
+            verify($storage)->hasKey('jsFiles');
+            verify($storage->jsFiles)->equals($expected);
         }, ['examples' => [
-            ['file1', [], 'test', ['jsFile', ['test' => ['file1' => []]]]],
-            ['file2', ['option' => 1], 'test', ['jsFile', ['test' => ['file2' => ['option' => 1]]]]],
-            ['file3', ['option' => 1], null, ['jsFile', [md5('file3') => ['file3' => ['option' => 1]]]]],
+            ['file1', [], 'test', ['test' => ['file1' => []]]],
+            ['file2', ['option' => 1], 'test', ['test' => ['file2' => ['option' => 1]]]],
+            ['file3', ['option' => 1], null, [md5('file3') => ['file3' => ['option' => 1]]]],
+            [['file1', 'file2'], [], 'test', ['test' => ['file1' => [], 'file2' => []]]],
         ]]);
     }
 
@@ -121,21 +122,34 @@ class ConfigTest extends \Codeception\Test\Unit
             ]
         ]);
 
-        $this->specify('it creates config array and passes it into merge method', function () {
-            $config = $this->mockConfig([
-                'addData' => Stub::exactly(2, function ($key, $data) {
-                    verify($key)->equals('jsDeps');
-                    verify($data)->equals(['test' => ['dependency']]);
-                })], $this);
+        $this->specify('it inserts dependencies data into the internal storage', function () {
+            $storage = $this->tester->getMethod($this->config, 'getStorage')->invoke($this->config);
 
-            $config->addDependency('test', 'dependency');
-            $config->addDependency('test', ['dependency']);
+            verify($storage)->hasntKey('jsDeps');
 
-            $this->verifyMockObjects();
+            $this->config->addDependency('test', 'dependency');
+
+            verify($storage)->hasKey('jsDeps');
+            verify($storage->jsDeps)->equals(['test' => ['dependency']]);
+
+            $this->config->addDependency('test', ['dependency2']);
+
+            verify($storage->jsDeps)->equals(['test' => ['dependency', 'dependency2']]);
         });
 
         $this->specify('it returns self-reference', function () {
             verify($this->config->addDependency('file', 'dep'))->same($this->config);
         });
+    }
+
+    public function testStorageGetter()
+    {
+        $config = $this->mockConfig();
+
+        $getStorage = $this->tester->getMethod($config, 'getStorage');
+        $storage = $getStorage->invoke($config);
+
+        verify($storage)->isInstanceOf('ArrayObject');
+        verify($storage)->same($getStorage->invoke($config));
     }
 }
