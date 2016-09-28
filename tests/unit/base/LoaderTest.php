@@ -322,49 +322,5 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $this->verifyMockObjects();
         });
-
-        $this->specify('it encloses code blocks from POS_LOAD section within jQuery(window).load()', function () {
-            $this->view->js = [
-                View::POS_LOAD => [
-                    'test' => 'load code block'
-                ],
-            ];
-
-            $loader = $this->tester->mockBaseLoader([
-                'view' => $this->view,
-                'doRender' => Stub::once(function($codeBlocks) {
-                    verify($codeBlocks)->internalType('array');
-                    verify($codeBlocks)->hasKey(View::POS_LOAD);
-                    verify($codeBlocks[View::POS_LOAD])->hasKey('code');
-                    verify($codeBlocks[View::POS_LOAD]['code'])->equals("jQuery(window).load(function () {\nload code block\n});");
-                })
-            ], $this);
-
-            $loader->processAssets();
-
-            $this->verifyMockObjects();
-        });
-
-        $this->specify('it encloses code blocks from POS_READY section within jQuery(document).ready()', function () {
-            $this->view->js = [
-                View::POS_READY => [
-                    'test' => 'ready code block'
-                ],
-            ];
-
-            $loader = $this->tester->mockBaseLoader([
-                'view' => $this->view,
-                'doRender' => Stub::once(function($codeBlocks) {
-                    verify($codeBlocks)->internalType('array');
-                    verify($codeBlocks)->hasKey(View::POS_READY);
-                    verify($codeBlocks[View::POS_READY])->hasKey('code');
-                    verify($codeBlocks[View::POS_READY]['code'])->equals("jQuery(document).ready(function () {\nready code block\n});");
-                })
-            ], $this);
-
-            $loader->processAssets();
-
-            $this->verifyMockObjects();
-        });
     }
 }

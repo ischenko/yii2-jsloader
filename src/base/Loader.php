@@ -134,14 +134,6 @@ abstract class Loader extends Object implements LoaderInterface
 
                 if ($position == View::POS_LOAD || $position == View::POS_READY) {
                     $depends[] = JqueryAsset::className();
-
-                    if ($position == View::POS_LOAD) {
-                        $codeBlock = "jQuery(window).load(function () {\n{$codeBlock}\n});";
-                    }
-
-                    if ($position == View::POS_READY) {
-                        $codeBlock = "jQuery(document).ready(function () {\n{$codeBlock}\n});";
-                    }
                 }
 
                 unset($view->js[$position]);
