@@ -82,7 +82,7 @@ class LoaderTest extends \Codeception\Test\Unit
         $this->specify('it will register dependencies recursively', function () {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'addDependency' => Stub::exactly(3)
+                    'addDependency' => Stub::exactly(2)
                 ], $this)
             ]);
 

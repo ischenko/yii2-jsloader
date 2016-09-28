@@ -104,23 +104,32 @@ class ConfigTest extends \Codeception\Test\Unit
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
-        $this->specify('it throws an exception if dependency is not a string or is an empty string', function ($key) {
+        $this->specify('it throws an exception if dependency is not a string or array', function ($key) {
             $this->config->addDependency('test', $key);
         }, [
             'examples' => [
-                [['array']], [$this->config], [''], [false], [1]
+                [$this->config], [false], [1]
             ],
             'throws' => 'yii\base\InvalidParamException'
         ]);
 
+        $this->specify('it accepts dependency as a string or array', function ($depends) {
+            verify($this->config->addDependency('test', $depends))->same($this->config);
+        }, [
+            'examples' => [
+                [['dependency']], ['dependency'], [''], [[]]
+            ]
+        ]);
+
         $this->specify('it creates config array and passes it into merge method', function () {
             $config = $this->mockConfig([
-                'addData' => Stub::once(function ($key, $data) {
+                'addData' => Stub::exactly(2, function ($key, $data) {
                     verify($key)->equals('jsDeps');
                     verify($data)->equals(['test' => ['dependency']]);
                 })], $this);
 
             $config->addDependency('test', 'dependency');
+            $config->addDependency('test', ['dependency']);
 
             $this->verifyMockObjects();
         });

@@ -41,11 +41,11 @@ abstract class Config extends Object implements ConfigInterface
     {
         if (empty($key) || !is_string($key)) {
             throw new InvalidParamException('Key must be a string and cannot be empty');
-        } elseif (empty($depends) || !is_string($depends)) {
-            throw new InvalidParamException('Dependency name must be a string and cannot be empty');
+        } elseif (!is_string($depends) && !is_array($depends)) {
+            throw new InvalidParamException('Dependency name must be a string or array');
         }
 
-        $this->addData('jsDeps', [$key => [$depends]]);
+        $this->addData('jsDeps', [$key => (array)$depends]);
 
         return $this;
     }

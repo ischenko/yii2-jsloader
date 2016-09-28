@@ -78,12 +78,18 @@ abstract class Loader extends Object implements LoaderInterface
             return false;
         }
 
-        $config = $this->getConfig();
+        $dependencies = [];
 
         foreach ($bundle->depends as $dependency) {
             if ($this->registerAssetBundle($dependency) !== false) {
-                $config->addDependency($name, $dependency);
+                $dependencies[] = $dependency;
             }
+        }
+
+        $config = $this->getConfig();
+
+        if ($dependencies !== []) {
+            $config->addDependency($name, $dependencies);
         }
 
         $am = $view->getAssetManager();

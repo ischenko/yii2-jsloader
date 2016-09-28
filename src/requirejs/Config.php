@@ -150,9 +150,7 @@ class Config extends BaseConfig
     protected function getStorage()
     {
         if (!$this->_storage) {
-            $this->_storage = new \ArrayObject([
-                'jsCode' => []
-            ], \ArrayObject::ARRAY_AS_PROPS);
+            $this->_storage = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
         }
 
         return $this->_storage;

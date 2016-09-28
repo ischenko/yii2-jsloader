@@ -37,7 +37,7 @@ interface ConfigInterface
      * Adds dependency for section
      *
      * @param string $key section name to add dependency to
-     * @param string $depends dependency name that is being added
+     * @param string|array $depends dependency name(s) that is/are being added
      *
      * @return $this
      */
