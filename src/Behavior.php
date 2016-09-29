@@ -30,7 +30,7 @@ class Behavior extends \yii\base\Behavior
     /**
      * @var LoaderInterface
      */
-    private $_loader;
+    private $_loader = [];
 
     /**
      * @inheritdoc
@@ -66,11 +66,21 @@ class Behavior extends \yii\base\Behavior
 
     /**
      * @return LoaderInterface
+     *
+     * @throws InvalidConfigException
      */
     public function getLoader()
     {
-        if ($this->_loader === null) {
-            $this->setLoader(['class' => 'ischenko\yii2\jsloader\RequireJs']);
+        if (is_array($this->_loader)) {
+            if (empty($this->_loader['class'])) {
+                $this->_loader['class'] = 'ischenko\yii2\jsloader\RequireJs';
+            }
+
+            $this->_loader = \Yii::createObject($this->_loader, [$this->ensureView($this->owner)]);
+        }
+
+        if (!($this->_loader instanceof LoaderInterface)) {
+            throw new InvalidConfigException("Unable to instantiate new loader please check configuration");
         }
 
         return $this->_loader;
@@ -83,12 +93,8 @@ class Behavior extends \yii\base\Behavior
      */
     public function setLoader($loader)
     {
-        if (is_array($loader)) {
-            $loader = \Yii::createObject($loader, [$this->ensureView($this->owner)]);
-        }
-
-        if (!($loader instanceof LoaderInterface)) {
-            throw new InvalidParamException("Argument is not an object that implements loader interface");
+        if (!is_array($loader) && !($loader instanceof LoaderInterface)) {
+            throw new InvalidParamException("Argument should be an array or implement LoaderInterface");
         }
 
         $this->_loader = $loader;

@@ -79,8 +79,16 @@ class BehaviorTest extends \Codeception\Test\Unit
 
         $this->behavior->attach($this->tester->mockView());
 
+        $this->specify('it accepts array as argument', function() {
+            $stub = $this->tester->mockBaseLoader();
+
+            $this->behavior->setLoader(['class' => get_class($stub)]);
+
+            verify($this->behavior->getLoader())->isInstanceOf(get_class($stub));
+        });
+
         $this->specify('setter throws an exception', function () {
-            $this->specify('if argument is not an object that implements loader interface', function ($value) {
+            $this->specify('if argument is not an array or an object that implements loader interface', function ($value) {
                 $this->behavior->setLoader($value);
             }, [
                 'examples' => [
@@ -92,21 +100,12 @@ class BehaviorTest extends \Codeception\Test\Unit
                 ],
                 'throws' => 'yii\base\InvalidParamException'
             ]);
-
-            $this->specify('if argument is not a valid configuration array', function () {
-                $this->specify('class element is missing', function () {
-                    $this->behavior->setLoader([]);
-                }, ['throws' => 'yii\base\InvalidConfigException']);
-
-                $this->specify('class does not exist', function () {
-                    $this->behavior->setLoader(['class' => uniqid('test_')]);
-                }, ['throws' => 'ReflectionException']);
-
-                $this->specify('class does not implement loader interface', function () {
-                    $this->behavior->setLoader(['class' => 'yii\web\View']);
-                }, ['throws' => 'yii\base\InvalidParamException']);
-            });
         });
+
+        $this->specify('getter throws an exception if object does not implement LoaderInterface', function () {
+            $this->behavior->setLoader(['class' => '\ArrayObject']);
+            $this->behavior->getLoader();
+        }, ['throws' => 'yii\base\InvalidConfigException']);
 
         $this->specify('getter returns an instance of requirejs loader by default', function () {
             verify($this->behavior->getLoader())->isInstanceOf('ischenko\yii2\jsloader\RequireJs');

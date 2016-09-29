@@ -83,7 +83,6 @@ abstract class Config extends Object implements ConfigInterface
         return $this;
     }
 
-
     /**
      * @return \ArrayObject an object that used as internal storage
      */
