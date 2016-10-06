@@ -25,4 +25,8 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
 
 script:
-  - vendor/bin/codecept run
+  - vendor/bin/codecept run --coverage --coverage-xml "tests/_output/coverage.xml"
+
+after_script:
+  - travis_retry wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover tests/_output/coverage.xml
