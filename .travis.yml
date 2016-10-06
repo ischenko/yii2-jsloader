@@ -30,7 +30,7 @@ install:
 before_script:
   - |
     if [ $TRAVIS_PHP_VERSION = '5.6' ]; then
-      CODECEPT_FLAGS="--coverage --coverage-xml "build/logs/clover.xml""
+      CODECEPT_FLAGS="--coverage --coverage-xml coverage.xml"
     fi
 
 script:
@@ -39,7 +39,7 @@ script:
 after_script:
   - |
     if [ $TRAVIS_PHP_VERSION = '5.6' ]; then
-      vendor/bin/test-reporter
+      vendor/bin/test-reporter --coverage-report tests/_output/coverage.xml
     fi
 
 addons:
