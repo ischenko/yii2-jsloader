@@ -23,23 +23,28 @@ interface ConfigInterface
     public function toArray();
 
     /**
-     * Adds JS file into configuration
+     * Adds new module into configuration
      *
-     * @param string $file filename or URL to be added
-     * @param array $options options for given file
-     * @param string|null $key section name (normally it is a bundle name), value can be NULL which means that it is standalone file
+     * If passed a string a new module will be created if it does not exist yet
      *
-     * @return $this
+     * @param ModuleInterface|string $module an instance of module to be added or name of a module to be created and added
+     *
+     * @return ModuleInterface
      */
-    public function addFile($file, $options = [], $key = null);
+    public function addModule($module);
 
     /**
-     * Adds dependency for section
+     * @param string $name a name of requested module
+     * @param boolean $create if set to true then new instance of a module will be created if none found
      *
-     * @param string $key section name to add dependency to
-     * @param string|array $depends dependency name(s) that is/are being added
-     *
-     * @return $this
+     * @return ModuleInterface|null an instance of a module or null if module not found
      */
-    public function addDependency($key, $depends);
+    public function getModule($name, $create = false);
+
+    /**
+     * @param FilterInterface $filter filter to be used to select modules for matching conditions
+     *
+     * @return ModuleInterface[] a list of registered modules
+     */
+    public function getModules(FilterInterface $filter = null);
 }

@@ -58,11 +58,15 @@ class LoaderTest extends \Codeception\Test\Unit
         verify_that(property_exists($loader->getConfig(), 'prop2'));
     }
 
+    /**
+     * @_depends ischenko\yii2\jsloader\tests\unit\base\ConfigTest:testAddModule
+     */
     public function testRegisterAssetBundle()
     {
         $this->specify('it does not process bundles that are not registered in a view', function () {
             verify($this->tester->mockBaseLoader()->registerAssetBundle('test'))->false();
         });
+
 
         $this->specify('it does not process bundle if it is not an instance of AssetBundle object', function ($value) {
             $loader = $this->tester->mockBaseLoader([
@@ -79,11 +83,28 @@ class LoaderTest extends \Codeception\Test\Unit
             [123]
         ]]);
 
+        $this->specify('it will create a module for asset bundle and return it', function () {
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'getModule' => Stub::once(function ($name) {
+                        verify($name)->equals('test');
+                        return $this->tester->mockModuleInterface();
+                    })
+                ], $this)
+            ]);
+
+            $loader->getView()->assetBundles['test'] = $bundle = Stub::makeEmpty(AssetBundle::className());
+
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        });
+
         $this->specify('it will register dependencies recursively', function () {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'addDependency' => Stub::exactly(2)
-                ], $this)
+                    'getModule' => $this->tester->mockModuleInterface([
+                        'addDependency' => Stub::exactly(3)
+                    ], $this)
+                ])
             ]);
 
             $loader->getView()->assetBundles = [
@@ -99,7 +120,34 @@ class LoaderTest extends \Codeception\Test\Unit
                 'depN' => Stub::makeEmpty(AssetBundle::className(), ['depends' => ['dep2']])
             ];
 
-            verify($loader->registerAssetBundle('test'))->true();
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it loads files from asset bundle', function () {
+            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+                'js' => [
+                    'file1.js',
+                    'file2.js',
+                    'file3.js',
+                    'fileN.js'
+                ]
+            ]);
+
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'getModule' => $this->tester->mockModuleInterface([
+                        'addFile' => Stub::exactly(4, function ($file) use ($bundle) {
+                            verify($bundle->js)->contains($file);
+                        })
+                    ], $this)
+                ])
+            ]);
+
+            $loader->getView()->assetBundles['test'] = $bundle;
+
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
 
             $this->verifyMockObjects();
         });
@@ -114,21 +162,22 @@ class LoaderTest extends \Codeception\Test\Unit
                 ]
             ]);
 
-            $loader = $this->tester->mockBaseLoader();
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'getModule' => $this->tester->mockModuleInterface()
+                ])
+            ]);
+
             $loader->getView()->assetBundles['test'] = $bundle;
 
-            verify($loader->registerAssetBundle('test'))->true();
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
 
             verify($bundle->js)->equals([]);
         });
 
-        $this->specify('it loads files from asset bundle with js settings from asset bundle', function () {
+        $this->specify('it loads settings from asset bundle', function () {
             $bundle = Stub::makeEmpty(AssetBundle::className(), [
                 'js' => [
-                    'file1.js',
-                    'file2.js',
-                    'file3.js',
-                    'fileN.js'
                 ],
                 'jsOptions' => [
                     'option1' => 'value1',
@@ -139,22 +188,22 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'addFile' => Stub::exactly(4, function ($file, $options, $collection) use ($bundle) {
-                        verify($collection)->equals('test');
-                        verify($bundle->js)->contains($file);
-                        verify($options)->equals($bundle->jsOptions);
-                    })
-                ], $this)
+                    'getModule' => $this->tester->mockModuleInterface([
+                        'setOptions' => Stub::once(function ($options) use ($bundle) {
+                            verify($options)->equals($bundle->jsOptions);
+                        })
+                    ], $this)
+                ])
             ]);
 
             $loader->getView()->assetBundles['test'] = $bundle;
 
-            verify($loader->registerAssetBundle('test'))->true();
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
 
             $this->verifyMockObjects();
         });
 
-        $this->specify('each file could be an array with its own settings',
+        $this->specify('each file can have its own settings',
             function ($js, $expectedFile, $expectedOptions) {
                 $bundle = Stub::makeEmpty(AssetBundle::className(), [
                     'js' => [
@@ -164,18 +213,20 @@ class LoaderTest extends \Codeception\Test\Unit
 
                 $loader = $this->tester->mockBaseLoader([
                     'getConfig' => $this->tester->mockConfigInterface([
-                        'addFile' => Stub::once(function ($file, $options) use ($expectedFile, $expectedOptions) {
-                            verify($file)->internalType('string');
-                            verify($file)->equals($expectedFile);
-                            verify($options)->internalType('array');
-                            verify($options)->equals($expectedOptions);
-                        })
-                    ], $this)
+                        'getModule' => $this->tester->mockModuleInterface([
+                            'addFile' => Stub::once(function ($file, $options) use ($expectedFile, $expectedOptions) {
+                                verify($file)->internalType('string');
+                                verify($file)->equals($expectedFile);
+                                verify($options)->internalType('array');
+                                verify($options)->equals($expectedOptions);
+                            }, $this)
+                        ])
+                    ])
                 ]);
 
                 $loader->getView()->assetBundles['test'] = $bundle;
 
-                verify($loader->registerAssetBundle('test'))->true();
+                verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
 
                 $this->verifyMockObjects();
             },
@@ -187,8 +238,12 @@ class LoaderTest extends \Codeception\Test\Unit
             ]]);
     }
 
+    /**
+     * @depends testRegisterAssetBundle
+     */
     public function testProcessAssets()
     {
+
         $this->view = $this->tester->mockView();
 
         $this->view->js = [
@@ -270,17 +325,25 @@ class LoaderTest extends \Codeception\Test\Unit
                 ],
             ];
 
+            $this->module = $this->tester->mockModuleInterface();
+
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_LOAD);
                     verify($codeBlocks[View::POS_LOAD])->hasKey('depends');
-                    verify($codeBlocks[View::POS_LOAD]['depends'])->contains('yii\web\JqueryAsset');
+                    verify($codeBlocks[View::POS_LOAD]['depends'])->contains($this->module);
                     verify($codeBlocks)->hasKey(View::POS_READY);
                     verify($codeBlocks[View::POS_READY])->hasKey('depends');
-                    verify($codeBlocks[View::POS_READY]['depends'])->contains('yii\web\JqueryAsset');
-                })
+                    verify($codeBlocks[View::POS_READY]['depends'])->contains($this->module);
+                }),
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'getModule' => Stub::exactly(2, function ($name) {
+                        verify($name)->equals('yii\web\JqueryAsset');
+                        return $this->module;
+                    })
+                ], $this)
             ], $this);
 
             $loader->processAssets();
@@ -288,7 +351,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
 
-        $this->specify('it generates keys for registered js files and adds them as dependencies for appropriate code block', function() {
+        $this->specify('it registers modules for js files and adds them as dependencies for appropriate code block', function () {
             $this->view->jsFiles = [
                 View::POS_BEGIN => [
                     Html::jsFile('/file1.js'),
@@ -300,19 +363,34 @@ class LoaderTest extends \Codeception\Test\Unit
                 ],
             ];
 
+            $this->modules = [
+                '/file1.js' => $this->tester->mockModuleInterface(),
+                '/file2.js' => $this->tester->mockModuleInterface(),
+                '/file3.js' => $this->tester->mockModuleInterface(),
+                '/file4.js' => $this->tester->mockModuleInterface(),
+            ];
+
+            $this->module = $this->tester->mockModuleInterface([
+                'addFile' => Stub::exactly(4, function ($name) {
+                    return $this->modules[$name];
+                })
+            ], $this);
+
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'addFile' => Stub::exactly(4)
+                    'addModule' => Stub::exactly(4, function ($name) {
+                        return $this->module;
+                    })
                 ], $this),
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
                     verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
-                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([md5('/file1.js'), md5('/file2.js')]);
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file2.js']]);
                     verify($codeBlocks)->hasKey(View::POS_END);
                     verify($codeBlocks[View::POS_END])->hasKey('depends');
-                    verify($codeBlocks[View::POS_END]['depends'])->equals([md5('/file3.js'), md5('/file4.js')]);
+                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file4.js']]);
                 })
             ], $this);
 

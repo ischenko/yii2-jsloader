@@ -44,7 +44,7 @@ interface LoaderInterface
      *
      * @param string $name
      *
-     * @return boolean whether asset bundle registered successfully or not
+     * @return ModuleInterface|false an instance of registered module or false if asset bundle was not registered
      */
     public function registerAssetBundle($name);
 }

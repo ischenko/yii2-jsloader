@@ -61,9 +61,6 @@ class BehaviorTest extends \Codeception\Test\Unit
         });
     }
 
-    /**
-     * @depends ischenko\yii2\jsloader\tests\unit\RequireJsTest:testInstance
-     */
     public function testLoaderProperty()
     {
         verify_that($this->behavior->canGetProperty('loader'));
@@ -106,10 +103,6 @@ class BehaviorTest extends \Codeception\Test\Unit
             $this->behavior->setLoader(['class' => '\ArrayObject']);
             $this->behavior->getLoader();
         }, ['throws' => 'yii\base\InvalidConfigException']);
-
-        $this->specify('getter returns an instance of requirejs loader by default', function () {
-            verify($this->behavior->getLoader())->isInstanceOf('ischenko\yii2\jsloader\RequireJs');
-        });
     }
 
     public function testProcessBundles()

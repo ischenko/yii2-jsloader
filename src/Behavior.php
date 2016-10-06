@@ -72,10 +72,6 @@ class Behavior extends \yii\base\Behavior
     public function getLoader()
     {
         if (is_array($this->_loader)) {
-            if (empty($this->_loader['class'])) {
-                $this->_loader['class'] = 'ischenko\yii2\jsloader\RequireJs';
-            }
-
             $this->_loader = \Yii::createObject($this->_loader, [$this->ensureView($this->owner)]);
         }
 

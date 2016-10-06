@@ -34,6 +34,14 @@ class Unit extends \Codeception\Module
     }
 
     /**
+     * @return \ischenko\yii2\jsloader\ModuleInterface
+     */
+    public function mockModuleInterface($params = [], $testCase = false)
+    {
+        return Stub::makeEmpty('ischenko\yii2\jsloader\ModuleInterface', $params, $testCase);
+    }
+
+    /**
      * @return \ischenko\yii2\jsloader\ConfigInterface
      */
     public function mockConfigInterface($params = [], $testCase = false)
