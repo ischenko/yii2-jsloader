@@ -29,7 +29,7 @@ abstract class Loader extends Object implements LoaderInterface
     /**
      * @var View
      */
-    private $_view;
+    private $view;
 
     /**
      * Loader constructor.
@@ -41,7 +41,7 @@ abstract class Loader extends Object implements LoaderInterface
     {
         parent::__construct($config);
 
-        $this->_view = $view;
+        $this->view = $view;
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function getView()
     {
-        return $this->_view;
+        return $this->view;
     }
 
     /**
@@ -83,7 +83,10 @@ abstract class Loader extends Object implements LoaderInterface
 
         $config = $this->getConfig();
 
-        $module = $config->getModule($name, true);
+        if (!($module = $config->getModule($name))) {
+            $module = $config->addModule($name);
+        }
+
         $module->setOptions($bundle->jsOptions);
 
         foreach ($bundle->depends as $dependency) {

@@ -23,7 +23,7 @@ abstract class Config extends Object implements ConfigInterface
     /**
      * @var ModuleInterface[]
      */
-    private $_modules = [];
+    private $modules = [];
 
     /**
      * @inheritDoc
@@ -39,19 +39,17 @@ abstract class Config extends Object implements ConfigInterface
             $module = new Module($module);
         }
 
-        return ($this->_modules[$module->getName()] = $module);
+        return ($this->modules[$module->getName()] = $module);
     }
 
     /**
      * @inheritDoc
      */
-    public function getModule($name, $create = false)
+    public function getModule($name)
     {
-        if (isset($this->_modules[$name])) {
-            return $this->_modules[$name];
+        if (isset($this->modules[$name])) {
+            return $this->modules[$name];
         }
-
-        return $create ? $this->addModule($name) : null;
     }
 
     /**
@@ -59,6 +57,6 @@ abstract class Config extends Object implements ConfigInterface
      */
     public function getModules(FilterInterface $filter = null)
     {
-        return $this->_modules;
+        return $this->modules;
     }
 }

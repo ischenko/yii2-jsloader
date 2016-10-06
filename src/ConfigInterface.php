@@ -35,11 +35,10 @@ interface ConfigInterface
 
     /**
      * @param string $name a name of requested module
-     * @param boolean $create if set to true then new instance of a module will be created if none found
      *
      * @return ModuleInterface|null an instance of a module or null if module not found
      */
-    public function getModule($name, $create = false);
+    public function getModule($name);
 
     /**
      * @param FilterInterface $filter filter to be used to select modules for matching conditions

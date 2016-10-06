@@ -31,11 +31,9 @@ interface ModuleInterface
     public function addFile($file, $options = []);
 
     /**
-     * @param boolean $names if set to false it will return a list of files with options indexed by filename. Defaults to true
-     *
-     * @return array a list of files added into a module
+     * @return array a list of files and their options, indexed by filename
      */
-    public function getFiles($names = true);
+    public function getFiles();
 
     /**
      * Clears all files from a module
@@ -64,7 +62,6 @@ interface ModuleInterface
      * @return $this
      */
     public function clearDependencies();
-
 
     /**
      * @param array $options options for a module

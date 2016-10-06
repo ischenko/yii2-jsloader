@@ -105,10 +105,7 @@ class Behavior extends \yii\base\Behavior
     protected function ensureView($object)
     {
         if (!($object instanceof View)) {
-            throw new InvalidConfigException(
-                "'" . View::className() . "' instance expected, got '"
-                . get_class($object) . "'"
-            );
+            throw new InvalidConfigException('"yii\web\View" instance expected, got "' . get_class($object) . '"');
         }
 
         return $object;

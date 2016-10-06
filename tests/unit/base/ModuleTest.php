@@ -86,16 +86,15 @@ class ModuleTest extends \Codeception\Test\Unit
 
             $module->addFile('file1');
 
-            verify($module->getFiles(true))->equals(['file1']);
-            verify($module->getFiles(false))->equals(['file1' => []]);
+            verify($module->getFiles())->equals(['file1' => []]);
 
             $module->addFile('file2', ['option' => 1]);
 
-            verify($module->getFiles(false))->equals(['file1' => [], 'file2' => ['option' => 1]]);
+            verify($module->getFiles())->equals(['file1' => [], 'file2' => ['option' => 1]]);
 
             $module->addFile('file1', ['option' => 2]);
 
-            verify($module->getFiles(false))->equals(['file1' => ['option' => 2], 'file2' => ['option' => 1]]);
+            verify($module->getFiles())->equals(['file1' => ['option' => 2], 'file2' => ['option' => 1]]);
         });
     }
 
@@ -136,9 +135,9 @@ class ModuleTest extends \Codeception\Test\Unit
         $module->addFile('file1');
         $module->addFile('file2');
 
-        verify($module->getFiles(false))->equals(['file1' => [], 'file2' => []]);
+        verify($module->getFiles())->equals(['file1' => [], 'file2' => []]);
         verify($module->clearFiles())->same($module);
-        verify($module->getFiles(false))->equals([]);
+        verify($module->getFiles())->equals([]);
     }
 
     public function testClearDependencies()

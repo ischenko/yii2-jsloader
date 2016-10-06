@@ -21,22 +21,22 @@ class Module implements ModuleInterface
     /**
      * @var string
      */
-    private $_name;
+    private $name;
 
     /**
      * @var array
      */
-    private $_options = [];
+    private $options = [];
 
     /**
      * @var array
      */
-    private $_files = [];
+    private $files = [];
 
     /**
      * @var array
      */
-    private $_dependencies = [];
+    private $dependencies = [];
 
     /**
      * Module constructor
@@ -49,7 +49,7 @@ class Module implements ModuleInterface
             throw new InvalidParamException('Name must be a string and cannot be empty');
         }
 
-        $this->_name = $name;
+        $this->name = $name;
     }
 
     /**
@@ -57,7 +57,7 @@ class Module implements ModuleInterface
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -73,7 +73,7 @@ class Module implements ModuleInterface
             throw new InvalidParamException('Options value must be an array');
         }
 
-        $this->_files[$file] = $options;
+        $this->files[$file] = $options;
 
         return $this;
     }
@@ -81,9 +81,9 @@ class Module implements ModuleInterface
     /**
      * @inheritDoc
      */
-    public function getFiles($names = true)
+    public function getFiles()
     {
-        return $names ? array_keys($this->_files) : $this->_files;
+        return $this->files;
     }
 
     /**
@@ -91,7 +91,7 @@ class Module implements ModuleInterface
      */
     public function clearFiles()
     {
-        $this->_files = [];
+        $this->files = [];
 
         return $this;
     }
@@ -101,7 +101,7 @@ class Module implements ModuleInterface
      */
     public function addDependency(ModuleInterface $depends)
     {
-        $this->_dependencies[] = $depends;
+        $this->dependencies[] = $depends;
 
         return $this;
     }
@@ -111,7 +111,7 @@ class Module implements ModuleInterface
      */
     public function getDependencies()
     {
-        return $this->_dependencies;
+        return $this->dependencies;
     }
 
     /**
@@ -119,7 +119,7 @@ class Module implements ModuleInterface
      */
     public function clearDependencies()
     {
-        $this->_dependencies = [];
+        $this->dependencies = [];
 
         return $this;
     }
@@ -129,7 +129,7 @@ class Module implements ModuleInterface
      */
     public function setOptions(array $options)
     {
-        $this->_options = $options;
+        $this->options = $options;
     }
 
     /**
@@ -137,6 +137,6 @@ class Module implements ModuleInterface
      */
     public function getOptions()
     {
-        return $this->_options;
+        return $this->options;
     }
 }
