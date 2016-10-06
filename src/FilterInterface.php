@@ -16,7 +16,7 @@ namespace ischenko\yii2\jsloader;
 interface FilterInterface
 {
     /**
-     * Performs checking of a module
+     * Performs checks on data
      *
      * @param mixed $data
      * @return boolean

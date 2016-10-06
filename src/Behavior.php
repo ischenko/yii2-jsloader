@@ -22,8 +22,6 @@ use yii\web\View;
  * @since 1.0
  *
  * @property View $owner
- *
- * TODO: write docs for methods
  */
 class Behavior extends \yii\base\Behavior
 {

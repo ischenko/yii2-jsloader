@@ -17,7 +17,9 @@ use yii\web\View;
 use ischenko\yii2\jsloader\LoaderInterface;
 
 /**
- * TODO: write description
+ * Base class for JS loaders
+ *
+ *
  *
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
