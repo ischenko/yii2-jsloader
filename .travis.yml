@@ -19,13 +19,29 @@ cache:
     - vendor
 
 install:
+  - |
+    if [ $TRAVIS_PHP_VERSION != '5.6' ]; then
+        phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+    fi
   - travis_retry composer self-update && composer --version
   - travis_retry composer global require "fxp/composer-asset-plugin:~1.2"
   - travis_retry composer install --prefer-dist --no-interaction
 
+before_script:
+  - |
+    if [ $TRAVIS_PHP_VERSION = '5.6' ]; then
+      CODECEPT_FLAGS="--coverage --coverage-xml "build/logs/clover.xml""
+    fi
+
 script:
-  - vendor/bin/codecept run --coverage --coverage-xml "tests/_output/coverage.xml"
+  - vendor/bin/codecept run $CODECEPT_FLAGS
 
 after_script:
-  - travis_retry wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --format=php-clover tests/_output/coverage.xml
+  - |
+    if [ $TRAVIS_PHP_VERSION = '5.6' ]; then
+      vendor/bin/test-reporter
+    fi
+
+addons:
+  code_climate:
+    repo_token: 6de12a6628148efa91e508e53cdaaba1fefdbb3c3bb37360a0982dd32730ebc8
