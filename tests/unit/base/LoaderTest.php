@@ -188,7 +188,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => $this->tester->mockModuleInterface([
+                    'addModule' => $this->tester->mockModuleInterface([
                         'setOptions' => Stub::once(function ($options) use ($bundle) {
                             verify($options)->equals($bundle->jsOptions);
                         })
@@ -199,6 +199,35 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->getView()->assetBundles['test'] = $bundle;
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it ignores asset bundles which are positioned in the head section', function () {
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addModule' => Stub::once(function ($name) {
+                        verify($name)->equals('test1');
+                        return $this->tester->mockModuleInterface();
+                    })
+                ], $this)
+            ]);
+
+            $loader->getView()->assetBundles = [
+                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                    'jsOptions' => [
+                        'position' => View::POS_END
+                    ]
+                ]),
+                'test2' => Stub::makeEmpty(AssetBundle::className(), [
+                    'jsOptions' => [
+                        'position' => View::POS_HEAD
+                    ]
+                ]),
+            ];
+
+            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($loader->registerAssetBundle('test2'))->false();
 
             $this->verifyMockObjects();
         });
@@ -236,6 +265,30 @@ class LoaderTest extends \Codeception\Test\Unit
                 [['file3.js'], 'file3.js', []],
                 [['fileN.js', 'option'], 'fileN.js', ['option']]
             ]]);
+
+        $this->specify('it ignores files which are positioned in the head section', function () {
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addModule' => Stub::once(function ($name) {
+                        return $this->tester->mockModuleInterface();
+                    })
+                ], $this)
+            ]);
+
+            $loader->getView()->assetBundles = [
+                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                    'js' => [
+                        ['file1', 'position' => View::POS_HEAD],
+                        'file2'
+                    ]
+                ]),
+            ];
+
+            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
+
+            $this->verifyMockObjects();
+        });
     }
 
     /**

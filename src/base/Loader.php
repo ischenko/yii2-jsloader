@@ -7,6 +7,7 @@
 
 namespace ischenko\yii2\jsloader\base;
 
+use ischenko\yii2\jsloader\filters\Position as PositionFilter;
 use ischenko\yii2\jsloader\ModuleInterface;
 use yii\base\Object;
 use yii\helpers\ArrayHelper;
@@ -32,6 +33,11 @@ abstract class Loader extends Object implements LoaderInterface
     private $view;
 
     /**
+     * @var PositionFilter
+     */
+    private $ignoredPosition;
+
+    /**
      * Loader constructor.
      *
      * @param View $view
@@ -42,6 +48,7 @@ abstract class Loader extends Object implements LoaderInterface
         parent::__construct($config);
 
         $this->view = $view;
+        $this->ignoredPosition = new PositionFilter(View::POS_HEAD);
     }
 
     /**
@@ -81,6 +88,10 @@ abstract class Loader extends Object implements LoaderInterface
             return false;
         }
 
+        if ($this->ignoredPosition->match($bundle->jsOptions)) {
+            return false;
+        }
+
         $config = $this->getConfig();
 
         if (!($module = $config->getModule($name))) {
@@ -95,17 +106,22 @@ abstract class Loader extends Object implements LoaderInterface
             }
         }
 
+        $ignoredJs = [];
         $am = $view->getAssetManager();
 
         foreach ($bundle->js as $js) {
             if (!is_array($js)) {
                 $module->addFile($am->getAssetUrl($bundle, $js));
             } else {
-                $module->addFile($am->getAssetUrl($bundle, array_shift($js)), $js);
+                if ($this->ignoredPosition->match($js)) {
+                    $ignoredJs[] = $js;
+                } else {
+                    $module->addFile($am->getAssetUrl($bundle, array_shift($js)), $js);
+                }
             }
         }
 
-        $bundle->js = [];
+        $bundle->js = $ignoredJs;
 
         return $module;
     }
