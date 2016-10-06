@@ -28,7 +28,7 @@ class Behavior extends \yii\base\Behavior
     /**
      * @var LoaderInterface
      */
-    private $_loader = [];
+    private $loader = [];
 
     /**
      * @inheritdoc
@@ -69,15 +69,15 @@ class Behavior extends \yii\base\Behavior
      */
     public function getLoader()
     {
-        if (is_array($this->_loader)) {
-            $this->_loader = \Yii::createObject($this->_loader, [$this->ensureView($this->owner)]);
+        if (is_array($this->loader)) {
+            $this->loader = \Yii::createObject($this->loader, [$this->ensureView($this->owner)]);
         }
 
-        if (!($this->_loader instanceof LoaderInterface)) {
+        if (!($this->loader instanceof LoaderInterface)) {
             throw new InvalidConfigException("Unable to instantiate new loader please check configuration");
         }
 
-        return $this->_loader;
+        return $this->loader;
     }
 
     /**
@@ -91,7 +91,7 @@ class Behavior extends \yii\base\Behavior
             throw new InvalidParamException("Argument should be an array or implement LoaderInterface");
         }
 
-        $this->_loader = $loader;
+        $this->loader = $loader;
     }
 
     /**

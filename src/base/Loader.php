@@ -76,20 +76,8 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function registerAssetBundle($name)
     {
-        $view = $this->getView();
-
-        if (!isset($view->assetBundles[$name])) {
-            return false;
-        }
-
-        $bundle = $view->assetBundles[$name];
-
-        if (!($bundle instanceof AssetBundle)) {
-            return false;
-        }
-
-        if ($this->ignoredPosition->match($bundle->jsOptions)) {
-            return false;
+        if (($bundle = $this->getAssetBundleFromView($name)) === false) {
+            return $bundle;
         }
 
         $config = $this->getConfig();
@@ -106,22 +94,7 @@ abstract class Loader extends Object implements LoaderInterface
             }
         }
 
-        $ignoredJs = [];
-        $am = $view->getAssetManager();
-
-        foreach ($bundle->js as $js) {
-            if (!is_array($js)) {
-                $module->addFile($am->getAssetUrl($bundle, $js));
-            } else {
-                if ($this->ignoredPosition->match($js)) {
-                    $ignoredJs[] = $js;
-                } else {
-                    $module->addFile($am->getAssetUrl($bundle, array_shift($js)), $js);
-                }
-            }
-        }
-
-        $bundle->js = $ignoredJs;
+        $bundle->js = $this->importJsFilesFromBundle($bundle, $module);
 
         return $module;
     }
@@ -158,9 +131,9 @@ abstract class Loader extends Object implements LoaderInterface
 
             if (!empty($view->jsFiles[$position])) {
                 foreach ($view->jsFiles[$position] as $jsFile) {
-                    if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $m_)) {
-                        $depends[] = $config->addModule(md5($m_[2]))
-                            ->addFile($m_[2], ['position' => $position]);
+                    if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $matches)) {
+                        $depends[] = $config->addModule(md5($matches[2]))
+                            ->addFile($matches[2], ['position' => $position]);
                     }
                 }
 
@@ -178,6 +151,63 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         $this->doRender($codeBlocks);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return AssetBundle|false an asset bundle from the view or false if asset bundle not found
+     */
+    private function getAssetBundleFromView($name)
+    {
+        $view = $this->getView();
+
+        if (!isset($view->assetBundles[$name])) {
+            return false;
+        }
+
+        $bundle = $view->assetBundles[$name];
+
+        if (!($bundle instanceof AssetBundle)) {
+            return false;
+        }
+
+        if ($this->ignoredPosition->match($bundle->jsOptions)) {
+            return false;
+        }
+
+        return $bundle;
+    }
+
+    /**
+     * @param AssetBundle $bundle
+     * @param ModuleInterface $module
+     *
+     * @return array a list of ignored files
+     */
+    private function importJsFilesFromBundle(AssetBundle $bundle, ModuleInterface $module)
+    {
+        $ignoredJs = [];
+        $assetManager = $this->getView()->getAssetManager();
+
+        foreach ($bundle->js as $js) {
+            $file = $js;
+            $options = [];
+
+            if (is_array($js)) {
+                if ($this->ignoredPosition->match($js)) {
+                    $ignoredJs[] = $js;
+                    continue;
+                }
+
+                $file = array_shift($js);
+                $options = $js;
+            }
+
+            $module->addFile($assetManager->getAssetUrl($bundle, $file), $options);
+        }
+
+        return $ignoredJs;
     }
 
     /**
