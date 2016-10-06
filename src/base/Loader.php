@@ -74,6 +74,14 @@ abstract class Loader extends Object implements LoaderInterface
     /**
      * @inheritDoc
      */
+    public function setConfig($config)
+    {
+        \Yii::configure($this->getConfig(), $config);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function registerAssetBundle($name)
     {
         if (($bundle = $this->getAssetBundleFromView($name)) === false) {
@@ -104,9 +112,6 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function processAssets()
     {
-        $view = $this->getView();
-        $config = $this->getConfig();
-
         $codeBlocks = [];
 
         foreach ([
@@ -116,29 +121,8 @@ abstract class Loader extends Object implements LoaderInterface
                      View::POS_READY
                  ] as $position
         ) {
-            $depends = [];
-            $codeBlock = '';
-
-            if (!empty($view->js[$position])) {
-                $codeBlock = implode("\n", $view->js[$position]);
-
-                if ($position == View::POS_LOAD || $position == View::POS_READY) {
-                    $depends[] = $config->getModule(JqueryAsset::className());
-                }
-
-                unset($view->js[$position]);
-            }
-
-            if (!empty($view->jsFiles[$position])) {
-                foreach ($view->jsFiles[$position] as $jsFile) {
-                    if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $matches)) {
-                        $depends[] = $config->addModule(md5($matches[2]))
-                            ->addFile($matches[2], ['position' => $position]);
-                    }
-                }
-
-                unset($view->jsFiles[$position]);
-            }
+            list($codeBlock, $depends) = $this->importJsCodeFromView($position);
+            $depends = array_merge($depends, $this->importJsFilesFromView($position));
 
             if (empty($codeBlock) && empty($depends)) {
                 continue;
@@ -151,6 +135,55 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         $this->doRender($codeBlocks);
+    }
+
+    /**
+     * @param integer $position
+     *
+     * @return array
+     */
+    private function importJsFilesFromView($position)
+    {
+        $modules = [];
+        $view = $this->getView();
+        $config = $this->getConfig();
+
+        if (!empty($view->jsFiles[$position])) {
+            foreach ($view->jsFiles[$position] as $jsFile) {
+                if (preg_match('/src=(["\\\'])(.*?)\1/', $jsFile, $matches)) {
+                    $modules[] = $config->addModule(md5($matches[2]))
+                        ->addFile($matches[2], ['position' => $position]);
+                }
+            }
+
+            unset($view->jsFiles[$position]);
+        }
+
+        return $modules;
+    }
+
+    /**
+     * @param integer $position
+     *
+     * @return array
+     */
+    private function importJsCodeFromView($position)
+    {
+        $depends = [];
+        $codeBlock = '';
+        $view = $this->getView();
+
+        if (!empty($view->js[$position])) {
+            $codeBlock = implode("\n", $view->js[$position]);
+
+            if ($position == View::POS_LOAD || $position == View::POS_READY) {
+                $depends[] = $this->getConfig()->getModule(JqueryAsset::className());
+            }
+
+            unset($view->js[$position]);
+        }
+
+        return [$codeBlock, $depends];
     }
 
     /**
@@ -208,13 +241,5 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         return $ignoredJs;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setConfig($config)
-    {
-        \Yii::configure($this->getConfig(), $config);
     }
 }
