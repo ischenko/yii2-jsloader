@@ -395,7 +395,8 @@ class LoaderTest extends \Codeception\Test\Unit
                     'getModule' => Stub::exactly(2, function ($name) {
                         verify($name)->equals('yii\web\JqueryAsset');
                         return $this->module;
-                    })
+                    }),
+                    'getModules' => []
                 ], $this)
             ], $this);
 
@@ -434,7 +435,8 @@ class LoaderTest extends \Codeception\Test\Unit
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => Stub::exactly(4, function ($name) {
                         return $this->module;
-                    })
+                    }),
+                    'getModules' => []
                 ], $this),
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
@@ -450,6 +452,52 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->processAssets();
 
             verify($this->view->jsFiles)->equals([]);
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it gets modules for specific position and adds them as dependencies to appropriate code block', function () {
+            $this->modules = [
+                $this->tester->mockModuleInterface([
+                    'getName' => 'test1',
+                    'getOptions' => ['position' => View::POS_HEAD]
+                ]),
+                $this->tester->mockModuleInterface([
+                    'getName' => 'test2',
+                    'getOptions' => ['position' => View::POS_BEGIN]
+                ]),
+                $this->tester->mockModuleInterface([
+                    'getName' => 'test3',
+                    'getOptions' => ['position' => View::POS_BEGIN]
+                ]),
+                $this->tester->mockModuleInterface([
+                    'getName' => 'test4',
+                    'getOptions' => ['position' => View::POS_END]
+                ]),
+            ];
+
+            $config = Stub::make('ischenko\yii2\jsloader\base\Config');
+
+            $loader = $this->tester->mockBaseLoader([
+                'view' => $this->view,
+                'getConfig' => $config,
+                'doRender' => Stub::once(function ($codeBlocks) {
+                    verify($codeBlocks)->internalType('array');
+                    verify($codeBlocks)->hasntKey(View::POS_HEAD);
+                    verify($codeBlocks)->hasKey(View::POS_BEGIN);
+                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules[1], $this->modules[2]]);
+                    verify($codeBlocks)->hasKey(View::POS_END);
+                    verify($codeBlocks[View::POS_END])->hasKey('depends');
+                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules[3]]);
+                })
+            ], $this);
+
+            foreach ($this->modules as $module) {
+                $loader->getConfig()->addModule($module);
+            }
+
+            $loader->processAssets();
 
             $this->verifyMockObjects();
         });

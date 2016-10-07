@@ -27,9 +27,25 @@ class Position implements FilterInterface
      * Position constructor.
      * @param integer $position
      */
-    public function __construct($position)
+    public function __construct($position = null)
     {
         $this->position = $position;
+    }
+
+    /**
+     * @param integer $position
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getPosition()
+    {
+        return $this->position;
     }
 
     /**

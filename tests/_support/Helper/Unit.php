@@ -53,7 +53,7 @@ class Unit extends \Codeception\Module
     {
         $params = array_merge([
             'doRender' => null,
-            'getConfig' => Stub::makeEmpty('ischenko\yii2\jsloader\ConfigInterface')
+            'getConfig' => Stub::makeEmpty('ischenko\yii2\jsloader\ConfigInterface', ['getModules' => []])
         ], $params);
 
         if (!empty($params['view'])) {

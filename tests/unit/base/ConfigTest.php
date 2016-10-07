@@ -4,6 +4,7 @@ namespace ischenko\yii2\jsloader\tests\unit\base;
 
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\base\Config;
+use ischenko\yii2\jsloader\filters\Position;
 
 class ConfigTest extends \Codeception\Test\Unit
 {
@@ -58,5 +59,28 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($config->getModule('test'))->same($module2);
 
         verify($config->getModules())->equals(['test' => $module2]);
+    }
+
+    public function testModuleGetter()
+    {
+        $config = $this->mockConfig();
+
+        $module1 = $config->addModule('test1');
+        $module2 = $config->addModule('test2');
+        $module3 = $config->addModule('test3');
+        $module4 = $config->addModule('test4');
+
+        verify($module1)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($module2)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($module3)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($module4)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+
+        $module1->setOptions(['position' => 1]);
+        $module2->setOptions(['position' => 3]);
+        $module3->setOptions(['position' => 3]);
+
+        verify($config->getModules(new Position(1)))->equals([$module1]);
+        verify($config->getModules(new Position(2)))->equals([]);
+        verify($config->getModules(new Position(3)))->equals([$module2, $module3]);
     }
 }

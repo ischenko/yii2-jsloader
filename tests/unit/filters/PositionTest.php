@@ -28,6 +28,17 @@ class PositionTest extends \Codeception\Test\Unit
         verify($filter)->isInstanceOf('ischenko\yii2\jsloader\FilterInterface');
     }
 
+    public function testPositionProperty()
+    {
+        $position = new PositionFilter(1);
+
+        verify($position->getPosition())->equals(1);
+
+        $position->setPosition(2);
+
+        verify($position->getPosition())->equals(2);
+    }
+
     /**
      * @dataProvider providerPositionsData
      */

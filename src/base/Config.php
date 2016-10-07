@@ -57,6 +57,16 @@ abstract class Config extends Object implements ConfigInterface
      */
     public function getModules(FilterInterface $filter = null)
     {
-        return $this->modules;
+        $modules = [];
+
+        if ($filter !== null) {
+            foreach ($this->modules as $module) {
+                if ($filter->match($module)) {
+                    $modules[] = $module;
+                }
+            }
+        }
+
+        return $filter === null ? $this->modules : $modules;
     }
 }

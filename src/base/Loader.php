@@ -7,20 +7,16 @@
 
 namespace ischenko\yii2\jsloader\base;
 
-use ischenko\yii2\jsloader\filters\Position as PositionFilter;
-use ischenko\yii2\jsloader\ModuleInterface;
 use yii\base\Object;
-use yii\helpers\ArrayHelper;
+use yii\web\View;
 use yii\web\AssetBundle;
 use yii\web\JqueryAsset;
-use yii\web\View;
-
 use ischenko\yii2\jsloader\LoaderInterface;
+use ischenko\yii2\jsloader\ModuleInterface;
+use ischenko\yii2\jsloader\filters\Position as PositionFilter;
 
 /**
  * Base class for JS loaders
- *
- *
  *
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
@@ -76,7 +72,15 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function setConfig($config)
     {
-        \Yii::configure($this->getConfig(), $config);
+        $configObject = $this->getConfig();
+
+        if (is_object($config)) {
+            $config = get_object_vars($config);
+        }
+
+        foreach ((array)$config as $key => $value) {
+            $configObject->$key = $value;
+        }
     }
 
     /**
@@ -113,6 +117,8 @@ abstract class Loader extends Object implements LoaderInterface
     public function processAssets()
     {
         $codeBlocks = [];
+        $config = $this->getConfig();
+        $positionFilter = new PositionFilter();
 
         foreach ([
                      View::POS_BEGIN,
@@ -121,7 +127,11 @@ abstract class Loader extends Object implements LoaderInterface
                      View::POS_READY
                  ] as $position
         ) {
+            $positionFilter->setPosition($position);
+
             list($codeBlock, $depends) = $this->importJsCodeFromView($position);
+
+            $depends = array_merge($depends, $config->getModules($positionFilter));
             $depends = array_merge($depends, $this->importJsFilesFromView($position));
 
             if (empty($codeBlock) && empty($depends)) {
