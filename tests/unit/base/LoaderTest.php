@@ -296,6 +296,7 @@ class LoaderTest extends \Codeception\Test\Unit
      */
     public function testProcessAssets()
     {
+
         $this->view = $this->tester->mockView();
 
         $this->view->js = [
@@ -328,10 +329,12 @@ class LoaderTest extends \Codeception\Test\Unit
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->equals([
                         View::POS_END => [
-                            "end code block", []
+                            'code' => "end code block",
+                            'depends' => []
                         ],
                         View::POS_BEGIN => [
-                            "begin code block", []
+                            'code' => "begin code block",
+                            'depends' => []
                         ],
                     ]);
                 }),
@@ -382,11 +385,11 @@ class LoaderTest extends \Codeception\Test\Unit
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_LOAD);
-                    verify($codeBlocks[View::POS_LOAD])->hasKey(1);
-                    verify($codeBlocks[View::POS_LOAD][1])->contains($this->module);
+                    verify($codeBlocks[View::POS_LOAD])->hasKey('depends');
+                    verify($codeBlocks[View::POS_LOAD]['depends'])->contains($this->module);
                     verify($codeBlocks)->hasKey(View::POS_READY);
-                    verify($codeBlocks[View::POS_READY])->hasKey(1);
-                    verify($codeBlocks[View::POS_READY][1])->contains($this->module);
+                    verify($codeBlocks[View::POS_READY])->hasKey('depends');
+                    verify($codeBlocks[View::POS_READY]['depends'])->contains($this->module);
                 }),
                 'getConfig' => $this->tester->mockConfigInterface([
                     'getModule' => Stub::exactly(2, function ($name) {
@@ -415,55 +418,34 @@ class LoaderTest extends \Codeception\Test\Unit
             ];
 
             $this->modules = [
-                '/file1.js' => $this->tester->mockModuleInterface([
-                    'addFile' => Stub::once(function ($name) {
-                        verify($name)->equals('/file1.js');
-                        return $this->modules[$name];
-                    })
-                ], $this),
-                '/file2.js' => $this->tester->mockModuleInterface([
-                    'addFile' => Stub::once(function ($name) {
-                        verify($name)->equals('/file2.js');
-                        return $this->modules[$name];
-                    })
-                ], $this),
-                '/file3.js' => $this->tester->mockModuleInterface([
-                    'addFile' => Stub::once(function ($name) {
-                        verify($name)->equals('/file3.js');
-                        return $this->modules[$name];
-                    })
-                ], $this),
-                '/file4.js' => $this->tester->mockModuleInterface([
-                    'addFile' => Stub::once(function ($name) {
-                        verify($name)->equals('/file4.js');
-                        return $this->modules[$name];
-                    })
-                ], $this)
+                '/file1.js' => $this->tester->mockModuleInterface(),
+                '/file2.js' => $this->tester->mockModuleInterface(),
+                '/file3.js' => $this->tester->mockModuleInterface(),
+                '/file4.js' => $this->tester->mockModuleInterface(),
             ];
 
-            $this->modules = array_merge($this->modules, [
-                md5('/file1.js') => $this->modules['/file1.js'],
-                md5('/file2.js') => $this->modules['/file2.js'],
-                md5('/file3.js') => $this->modules['/file3.js'],
-                md5('/file4.js') => $this->modules['/file4.js']
-            ]);
+            $this->module = $this->tester->mockModuleInterface([
+                'addFile' => Stub::exactly(4, function ($name) {
+                    return $this->modules[$name];
+                })
+            ], $this);
 
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => Stub::exactly(4, function ($name) {
-                        return $this->modules[$name];
+                        return $this->module;
                     }),
                     'getModules' => []
                 ], $this),
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
-                    verify($codeBlocks[View::POS_BEGIN])->hasKey(1);
-                    verify($codeBlocks[View::POS_BEGIN][1])->equals([$this->modules['/file1.js'], $this->modules['/file2.js']]);
+                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file2.js']]);
                     verify($codeBlocks)->hasKey(View::POS_END);
-                    verify($codeBlocks[View::POS_END])->hasKey(1);
-                    verify($codeBlocks[View::POS_END][1])->equals([$this->modules['/file3.js'], $this->modules['/file4.js']]);
+                    verify($codeBlocks[View::POS_END])->hasKey('depends');
+                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file4.js']]);
                 })
             ], $this);
 
@@ -503,11 +485,11 @@ class LoaderTest extends \Codeception\Test\Unit
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasntKey(View::POS_HEAD);
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
-                    verify($codeBlocks[View::POS_BEGIN])->hasKey(1);
-                    verify($codeBlocks[View::POS_BEGIN][1])->equals([$this->modules[1], $this->modules[2]]);
+                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
+                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules[1], $this->modules[2]]);
                     verify($codeBlocks)->hasKey(View::POS_END);
-                    verify($codeBlocks[View::POS_END])->hasKey(1);
-                    verify($codeBlocks[View::POS_END][1])->equals([$this->modules[3]]);
+                    verify($codeBlocks[View::POS_END])->hasKey('depends');
+                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules[3]]);
                 })
             ], $this);
 

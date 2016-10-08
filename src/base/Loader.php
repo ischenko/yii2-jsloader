@@ -150,7 +150,7 @@ abstract class Loader extends Object implements LoaderInterface
                 continue;
             }
 
-            $codeBlocks[$position] = [$codeBlock, $depends];
+            $codeBlocks[$position] = ['code' => $codeBlock, 'depends' => $depends];
         }
 
         $this->doRender($codeBlocks);
