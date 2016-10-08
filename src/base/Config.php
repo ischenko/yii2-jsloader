@@ -26,12 +26,20 @@ abstract class Config extends Object implements ConfigInterface
     private $modules = [];
 
     /**
-     * @inheritDoc
+     * Builds configuration set into an array
+     *
+     * @return array
      */
     abstract public function toArray();
 
     /**
-     * @inheritDoc
+     * Adds new module into configuration
+     *
+     * If passed a string a new module will be created if it does not exist yet
+     *
+     * @param ModuleInterface|string $module an instance of module to be added or name of a module to be created and added
+     *
+     * @return ModuleInterface
      */
     public function addModule($module)
     {
@@ -43,7 +51,9 @@ abstract class Config extends Object implements ConfigInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $name a name of requested module
+     *
+     * @return ModuleInterface|null an instance of a module or null if module not found
      */
     public function getModule($name)
     {
@@ -53,7 +63,9 @@ abstract class Config extends Object implements ConfigInterface
     }
 
     /**
-     * @inheritDoc
+     * @param FilterInterface $filter filter to be used to select modules for matching conditions
+     *
+     * @return ModuleInterface[] a list of registered modules
      */
     public function getModules(FilterInterface $filter = null)
     {

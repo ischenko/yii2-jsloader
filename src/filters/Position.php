@@ -49,7 +49,10 @@ class Position implements FilterInterface
     }
 
     /**
-     * @inheritDoc
+     * Performs checks on data
+     *
+     * @param mixed $data
+     * @return boolean
      */
     public function match($data)
     {

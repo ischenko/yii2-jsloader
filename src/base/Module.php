@@ -53,7 +53,7 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * @return string a name associated with a module
      */
     public function getName()
     {
@@ -61,8 +61,12 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * Adds JS file into a module
      *
+     * @param string $file URL of a file
+     * @param array $options options for given file
+     *
+     * @return $this
      * @throws InvalidParamException
      */
     public function addFile($file, $options = [])
@@ -79,7 +83,7 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * @return array a list of files and their options, indexed by filename
      */
     public function getFiles()
     {
@@ -87,7 +91,9 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * Clears all files from a module
+     *
+     * @return $this
      */
     public function clearFiles()
     {
@@ -97,7 +103,11 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * Adds dependency to a module
+     *
+     * @param ModuleInterface $depends an instance of another module which will is being added as dependency
+     *
+     * @return $this
      */
     public function addDependency(ModuleInterface $depends)
     {
@@ -107,7 +117,7 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * @return ModuleInterface[] a list of dependencies of a module
      */
     public function getDependencies()
     {
@@ -115,7 +125,9 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * Clears all dependencies from a module
+     *
+     * @return $this
      */
     public function clearDependencies()
     {
@@ -125,7 +137,7 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * @param array $options options for a module
      */
     public function setOptions(array $options)
     {
@@ -133,7 +145,7 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @inheritDoc
+     * @return array a list of assigned options
      */
     public function getOptions()
     {

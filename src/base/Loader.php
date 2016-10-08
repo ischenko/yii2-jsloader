@@ -52,7 +52,7 @@ abstract class Loader extends Object implements LoaderInterface
     }
 
     /**
-     * @inheritDoc
+     * @return \ischenko\yii2\jsloader\ConfigInterface an object that implements configuration interface
      */
     abstract public function getConfig();
 
@@ -64,7 +64,7 @@ abstract class Loader extends Object implements LoaderInterface
     abstract protected function doRender(array $codeBlocks);
 
     /**
-     * @inheritDoc
+     * @return \yii\web\View the view object associated with the loader
      */
     public function getView()
     {
@@ -72,7 +72,9 @@ abstract class Loader extends Object implements LoaderInterface
     }
 
     /**
-     * @inheritDoc
+     * Sets new configuration for the loader
+     *
+     * @param ConfigInterface|array $config
      */
     public function setConfig($config)
     {
@@ -88,7 +90,11 @@ abstract class Loader extends Object implements LoaderInterface
     }
 
     /**
-     * @inheritDoc
+     * Registers asset bundle in the loader
+     *
+     * @param string $name
+     *
+     * @return ModuleInterface|false an instance of registered module or false if asset bundle was not registered
      */
     public function registerAssetBundle($name)
     {
@@ -116,7 +122,9 @@ abstract class Loader extends Object implements LoaderInterface
     }
 
     /**
-     * @inheritDoc
+     * Performs processing of assets registered in the view
+     *
+     * @return void
      */
     public function processAssets()
     {
@@ -142,10 +150,7 @@ abstract class Loader extends Object implements LoaderInterface
                 continue;
             }
 
-            $codeBlocks[$position] = [
-                'code' => $codeBlock,
-                'depends' => $depends
-            ];
+            $codeBlocks[$position] = [$codeBlock, $depends];
         }
 
         $this->doRender($codeBlocks);
