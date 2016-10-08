@@ -141,16 +141,15 @@ abstract class Loader extends Object implements LoaderInterface
         ) {
             $positionFilter->setPosition($position);
 
-            list($codeBlock, $depends) = $this->importJsCodeFromView($position);
-
-            $depends = array_merge($depends, $config->getModules($positionFilter));
+            $code = $this->importJsCodeFromView($position);
+            $depends = $config->getModules($positionFilter);
             $depends = array_merge($depends, $this->importJsFilesFromView($position));
 
-            if (empty($codeBlock) && empty($depends)) {
+            if (empty($code) && empty($depends)) {
                 continue;
             }
 
-            $codeBlocks[$position] = ['code' => $codeBlock, 'depends' => $depends];
+            $codeBlocks[$position] = ['code' => $code, 'depends' => $depends];
         }
 
         $this->doRender($codeBlocks);
@@ -199,25 +198,19 @@ abstract class Loader extends Object implements LoaderInterface
     /**
      * @param integer $position
      *
-     * @return array
+     * @return string
      */
     private function importJsCodeFromView($position)
     {
-        $depends = [];
-        $codeBlock = '';
+        $code = '';
         $view = $this->getView();
 
         if (!empty($view->js[$position])) {
-            $codeBlock = implode("\n", $view->js[$position]);
-
-            if ($position == View::POS_LOAD || $position == View::POS_READY) {
-                $depends[] = $this->getConfig()->getModule(JqueryAsset::className());
-            }
-
+            $code = implode("\n", $view->js[$position]);
             unset($view->js[$position]);
         }
 
-        return [$codeBlock, $depends];
+        return $code;
     }
 
     /**

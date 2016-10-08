@@ -368,43 +368,6 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
         });
 
-        $this->specify('it will add JqueryAsset as a dependency for code blocks from POS_READY and POS_LOAD sections', function () {
-            $this->view->js = [
-                View::POS_READY => [
-                    'test' => 'ready code block'
-                ],
-                View::POS_LOAD => [
-                    'test' => 'load code block'
-                ],
-            ];
-
-            $this->module = $this->tester->mockModuleInterface();
-
-            $loader = $this->tester->mockBaseLoader([
-                'view' => $this->view,
-                'doRender' => Stub::once(function ($codeBlocks) {
-                    verify($codeBlocks)->internalType('array');
-                    verify($codeBlocks)->hasKey(View::POS_LOAD);
-                    verify($codeBlocks[View::POS_LOAD])->hasKey('depends');
-                    verify($codeBlocks[View::POS_LOAD]['depends'])->contains($this->module);
-                    verify($codeBlocks)->hasKey(View::POS_READY);
-                    verify($codeBlocks[View::POS_READY])->hasKey('depends');
-                    verify($codeBlocks[View::POS_READY]['depends'])->contains($this->module);
-                }),
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => Stub::exactly(2, function ($name) {
-                        verify($name)->equals('yii\web\JqueryAsset');
-                        return $this->module;
-                    }),
-                    'getModules' => []
-                ], $this)
-            ], $this);
-
-            $loader->processAssets();
-
-            $this->verifyMockObjects();
-        });
-
         $this->specify('it registers modules for js files and adds them as dependencies for appropriate code block', function () {
             $this->view->jsFiles = [
                 View::POS_BEGIN => [
