@@ -108,7 +108,7 @@ abstract class Loader extends Object implements LoaderInterface
             $module = $config->addModule($name);
         }
 
-        $module->setOptions($bundle->jsOptions);
+        $module->setOptions(array_merge(['position' => View::POS_END], $bundle->jsOptions));
 
         foreach ($bundle->depends as $dependency) {
             if (($dependency = $this->registerAssetBundle($dependency)) !== false) {

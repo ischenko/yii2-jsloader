@@ -190,7 +190,7 @@ class LoaderTest extends \Codeception\Test\Unit
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => $this->tester->mockModuleInterface([
                         'setOptions' => Stub::once(function ($options) use ($bundle) {
-                            verify($options)->equals($bundle->jsOptions);
+                            verify($options)->equals(array_merge(['position' => View::POS_END], $bundle->jsOptions));
                         })
                     ], $this)
                 ])
