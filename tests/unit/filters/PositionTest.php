@@ -26,6 +26,7 @@ class PositionTest extends \Codeception\Test\Unit
         $filter = new PositionFilter(null);
 
         verify($filter)->isInstanceOf('ischenko\yii2\jsloader\FilterInterface');
+        verify($filter)->isInstanceOf('ischenko\yii2\jsloader\base\Filter');
     }
 
     public function testPositionProperty()

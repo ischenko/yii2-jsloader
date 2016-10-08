@@ -7,7 +7,7 @@
 
 namespace ischenko\yii2\jsloader\filters;
 
-use ischenko\yii2\jsloader\FilterInterface;
+use ischenko\yii2\jsloader\base\Filter;
 use ischenko\yii2\jsloader\ModuleInterface;
 
 /**
@@ -16,7 +16,7 @@ use ischenko\yii2\jsloader\ModuleInterface;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-class Position implements FilterInterface
+class Position extends Filter
 {
     /**
      * @var integer

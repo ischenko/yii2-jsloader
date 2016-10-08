@@ -5,15 +5,17 @@
  * @link https://github.com/ischenko/yii2-jsloader#readme
  */
 
-namespace ischenko\yii2\jsloader;
+namespace ischenko\yii2\jsloader\base;
+
+use ischenko\yii2\jsloader\FilterInterface;
 
 /**
- * Filter interface
+ * Base class for filters
  *
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-interface FilterInterface
+abstract class Filter implements FilterInterface
 {
     /**
      * Performs checks on single data entity
@@ -21,7 +23,7 @@ interface FilterInterface
      * @param mixed $data
      * @return boolean
      */
-    public function match($data);
+    abstract public function match($data);
 
     /**
      * Performs filtering of given array
@@ -29,5 +31,16 @@ interface FilterInterface
      * @param array $data
      * @return array filtered data
      */
-    public function filter(array $data);
+    public function filter(array $data)
+    {
+        $filteredData = [];
+
+        foreach ($data as $value) {
+            if ($this->match($value)) {
+                $filteredData[] = $value;
+            }
+        }
+
+        return $filteredData;
+    }
 }
