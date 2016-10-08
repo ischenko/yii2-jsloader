@@ -15,7 +15,7 @@ use yii\web\View;
  * The Behavior is used to process asset bundles registered within a view.
  *
  * It listens two events:
- *  - [[\yii\web\View::EVENT_END_BODY]] used to register of asset bundles from the view in the JS loader
+ *  - [[\yii\web\View::EVENT_END_BODY]] used to register an asset bundles from the view in the JS loader
  *  - [[\yii\web\View::EVENT_END_PAGE]] used to process other assets registered in the view and perform bootstrap of the JS loader
  *
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
@@ -74,7 +74,7 @@ class Behavior extends \yii\base\Behavior
         }
 
         if (!($this->loader instanceof LoaderInterface)) {
-            throw new InvalidConfigException("Unable to instantiate new loader please check configuration");
+            throw new InvalidConfigException('Unable to instantiate new loader please check configuration');
         }
 
         return $this->loader;
@@ -88,7 +88,7 @@ class Behavior extends \yii\base\Behavior
     public function setLoader($loader)
     {
         if (!is_array($loader) && !($loader instanceof LoaderInterface)) {
-            throw new InvalidParamException("Argument should be an array or implement LoaderInterface");
+            throw new InvalidParamException('Argument should be an array or implement LoaderInterface');
         }
 
         $this->loader = $loader;

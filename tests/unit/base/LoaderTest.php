@@ -502,4 +502,12 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
     }
+
+    public function testRuntimePathGetter()
+    {
+        $loader = $this->tester->mockBaseLoader();
+        $rtPath = $this->tester->getMethod($loader, 'getRuntimePath');
+
+        verify($rtPath->invoke($loader))->equals(\Yii::getAlias('@runtime/jsloader'));
+    }
 }

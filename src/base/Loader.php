@@ -7,10 +7,12 @@
 
 namespace ischenko\yii2\jsloader\base;
 
+use Yii;
 use yii\base\Object;
 use yii\web\View;
 use yii\web\AssetBundle;
 use yii\web\JqueryAsset;
+use yii\helpers\FileHelper;
 use ischenko\yii2\jsloader\LoaderInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
 use ischenko\yii2\jsloader\filters\Position as PositionFilter;
@@ -23,6 +25,8 @@ use ischenko\yii2\jsloader\filters\Position as PositionFilter;
  */
 abstract class Loader extends Object implements LoaderInterface
 {
+    const RUNTIME_DIR = '@runtime/jsloader';
+
     /**
      * @var View
      */
@@ -145,6 +149,21 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         $this->doRender($codeBlocks);
+    }
+
+    /**
+     * @return string a path to runtime folder
+     */
+    protected function getRuntimePath()
+    {
+        static $runtimePath;
+
+        if ($runtimePath === null) {
+            $runtimePath = Yii::getAlias(self::RUNTIME_DIR);
+            FileHelper::createDirectory($runtimePath);
+        }
+
+        return $runtimePath;
     }
 
     /**
