@@ -18,6 +18,36 @@ use ischenko\yii2\jsloader\FilterInterface;
 abstract class Filter implements FilterInterface
 {
     /**
+     * @var mixed|null
+     */
+    private $value;
+
+    /**
+     * Filter constructor.
+     * @param mixed $value
+     */
+    public function __construct($value = null)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
      * Performs checks on single data entity
      *
      * @param mixed $data

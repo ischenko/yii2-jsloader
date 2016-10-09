@@ -139,7 +139,7 @@ abstract class Loader extends Object implements LoaderInterface
                      View::POS_READY
                  ] as $position
         ) {
-            $positionFilter->setPosition($position);
+            $positionFilter->setValue($position);
 
             $code = $this->importJsCodeFromView($position);
             $depends = $config->getModules($positionFilter);

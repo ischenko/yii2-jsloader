@@ -19,36 +19,6 @@ use ischenko\yii2\jsloader\ModuleInterface;
 class Position extends Filter
 {
     /**
-     * @var integer
-     */
-    private $position;
-
-    /**
-     * Position constructor.
-     * @param integer $position
-     */
-    public function __construct($position = null)
-    {
-        $this->position = $position;
-    }
-
-    /**
-     * @param integer $position
-     */
-    public function setPosition($position)
-    {
-        $this->position = $position;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
-    /**
      * Performs checks on data
      *
      * @param mixed $data
@@ -60,6 +30,6 @@ class Position extends Filter
             $data = $data->getOptions();
         }
 
-        return isset($data['position']) && $data['position'] == $this->position;
+        return isset($data['position']) && $data['position'] == $this->getValue();
     }
 }

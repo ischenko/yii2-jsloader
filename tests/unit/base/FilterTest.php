@@ -19,13 +19,13 @@ class FilterTest extends \Codeception\Test\Unit
         parent::_before();
     }
 
-    protected function mockFilter($params = [], $testCase = false)
+    protected function mockFilter($params = [], $construct = [], $testCase = false)
     {
         $params = array_merge([
             'match' => false
         ], $params);
 
-        return $config = Stub::construct('ischenko\yii2\jsloader\base\Filter', [], $params, $testCase);
+        return $config = Stub::construct('ischenko\yii2\jsloader\base\Filter', $construct, $params, $testCase);
     }
 
     /** Tests go below */
@@ -52,5 +52,17 @@ class FilterTest extends \Codeception\Test\Unit
         })]);
 
         verify($filter->filter($data))->equals(['test', 'hello', 'world']);
+    }
+
+
+    public function testValueProperty()
+    {
+        $position = $this->mockFilter([], [1]);
+
+        verify($position->getValue())->equals(1);
+
+        $position->setValue(2);
+
+        verify($position->getValue())->equals(2);
     }
 }
