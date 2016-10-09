@@ -11,11 +11,12 @@ use Yii;
 use yii\base\Object;
 use yii\web\View;
 use yii\web\AssetBundle;
-use yii\web\JqueryAsset;
 use yii\helpers\FileHelper;
 use ischenko\yii2\jsloader\LoaderInterface;
+use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
 use ischenko\yii2\jsloader\filters\Position as PositionFilter;
+use ischenko\yii2\jsloader\filters\ClassName as ClassNameFilter;
 
 /**
  * Base class for JS loaders
@@ -38,6 +39,11 @@ abstract class Loader extends Object implements LoaderInterface
     private $ignoredPosition;
 
     /**
+     * @var ClassNameFilter
+     */
+    private $ignoredBundles;
+
+    /**
      * Loader constructor.
      *
      * @param View $view
@@ -48,6 +54,7 @@ abstract class Loader extends Object implements LoaderInterface
         parent::__construct($config);
 
         $this->view = $view;
+        $this->setIgnoreBundles([]);
         $this->ignoredPosition = new PositionFilter(View::POS_HEAD);
     }
 
@@ -69,6 +76,14 @@ abstract class Loader extends Object implements LoaderInterface
     public function getView()
     {
         return $this->view;
+    }
+
+    /**
+     * @param array $bundles a list of asset bundles names which should be ignored by the loader
+     */
+    public function setIgnoreBundles(array $bundles)
+    {
+        $this->ignoredBundles = new ClassNameFilter($bundles);
     }
 
     /**
@@ -232,7 +247,9 @@ abstract class Loader extends Object implements LoaderInterface
             return false;
         }
 
-        if ($this->ignoredPosition->match($bundle->jsOptions)) {
+        if ($this->ignoredBundles->match($name)
+            || $this->ignoredPosition->match($bundle->jsOptions)
+        ) {
             return false;
         }
 

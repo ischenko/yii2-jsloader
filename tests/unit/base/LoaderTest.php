@@ -67,7 +67,6 @@ class LoaderTest extends \Codeception\Test\Unit
             verify($this->tester->mockBaseLoader()->registerAssetBundle('test'))->false();
         });
 
-
         $this->specify('it does not process bundle if it is not an instance of AssetBundle object', function ($value) {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => Stub::never()
@@ -286,6 +285,34 @@ class LoaderTest extends \Codeception\Test\Unit
 
             verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
             verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it ignores asset bundles listed in the ignoreBundles property', function() {
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addModule' => Stub::once(function ($name) {
+                        verify($name)->equals('test1');
+                        return $this->tester->mockModuleInterface();
+                    })
+                ], $this)
+            ]);
+
+            $loader->getView()->assetBundles = [
+                'test1' => Stub::makeEmpty(AssetBundle::className()),
+                'test2' => Stub::makeEmpty(AssetBundle::className()),
+            ];
+
+            $loader->ignoreBundles = ['test2'];
+
+            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($loader->registerAssetBundle('test2'))->false();
+
+            $loader->ignoreBundles = ['test1', 'test2'];
+
+            verify($loader->registerAssetBundle('test1'))->false();
+            verify($loader->registerAssetBundle('test2'))->false();
 
             $this->verifyMockObjects();
         });
