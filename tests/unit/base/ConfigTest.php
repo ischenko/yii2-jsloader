@@ -59,6 +59,11 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($config->getModule('test'))->same($module2);
 
         verify($config->getModules())->equals(['test' => $module2]);
+
+        $module = $config->createModule('test');
+
+        verify($module)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($config->getModule('test'))->notSame($module);
     }
 
     public function testModuleGetter()

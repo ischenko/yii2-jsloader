@@ -44,7 +44,7 @@ abstract class Config extends Object implements ConfigInterface
     public function addModule($module)
     {
         if (!($module instanceof ModuleInterface)) {
-            $module = new Module($module);
+            $module = $this->createModule($module);
         }
 
         return ($this->modules[$module->getName()] = $module);
@@ -60,6 +60,18 @@ abstract class Config extends Object implements ConfigInterface
         if (isset($this->modules[$name])) {
             return $this->modules[$name];
         }
+    }
+
+    /**
+     * Creates a new module
+     *
+     * @param string $name a name of module to be created
+     *
+     * @return ModuleInterface
+     */
+    public function createModule($name)
+    {
+        return new Module($name);
     }
 
     /**

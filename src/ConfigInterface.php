@@ -41,6 +41,15 @@ interface ConfigInterface
     public function getModule($name);
 
     /**
+     * Creates a new module
+     *
+     * @param string $name a name of module to be created
+     *
+     * @return ModuleInterface
+     */
+    public function createModule($name);
+
+    /**
      * @param FilterInterface $filter filter to be used to select modules for matching conditions
      *
      * @return ModuleInterface[] a list of registered modules
