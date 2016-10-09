@@ -34,14 +34,14 @@ abstract class Loader extends Object implements LoaderInterface
     private $view;
 
     /**
-     * @var PositionFilter
-     */
-    private $ignoredPosition;
-
-    /**
      * @var ClassNameFilter
      */
     private $ignoredBundles;
+
+    /**
+     * @var PositionFilter
+     */
+    private $ignoredPositions;
 
     /**
      * Loader constructor.
@@ -55,7 +55,7 @@ abstract class Loader extends Object implements LoaderInterface
 
         $this->view = $view;
         $this->setIgnoreBundles([]);
-        $this->ignoredPosition = new PositionFilter(View::POS_HEAD);
+        $this->setIgnorePositions([View::POS_HEAD]);
     }
 
     /**
@@ -84,6 +84,14 @@ abstract class Loader extends Object implements LoaderInterface
     public function setIgnoreBundles(array $bundles)
     {
         $this->ignoredBundles = new ClassNameFilter($bundles);
+    }
+
+    /**
+     * @param array $positions a list of positions which should be skipped by the loader
+     */
+    public function setIgnorePositions(array $positions)
+    {
+        $this->ignoredPositions = new PositionFilter($positions);
     }
 
     /**
@@ -148,12 +156,17 @@ abstract class Loader extends Object implements LoaderInterface
         $positionFilter = new PositionFilter();
 
         foreach ([
+                     View::POS_HEAD,
                      View::POS_BEGIN,
                      View::POS_END,
                      View::POS_LOAD,
                      View::POS_READY
                  ] as $position
         ) {
+            if ($this->ignoredPositions->match($position)) {
+                continue;
+            }
+
             $positionFilter->setValue($position);
 
             $code = $this->importJsCodeFromView($position);
@@ -248,7 +261,7 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         if ($this->ignoredBundles->match($name)
-            || $this->ignoredPosition->match($bundle->jsOptions)
+            || $this->ignoredPositions->match($bundle->jsOptions)
         ) {
             return false;
         }
@@ -272,7 +285,7 @@ abstract class Loader extends Object implements LoaderInterface
             $options = [];
 
             if (is_array($js)) {
-                if ($this->ignoredPosition->match($js)) {
+                if ($this->ignoredPositions->match($js)) {
                     $ignoredJs[] = $js;
                     continue;
                 }

@@ -265,7 +265,41 @@ class LoaderTest extends \Codeception\Test\Unit
                 [['fileN.js', 'option'], 'fileN.js', ['option']]
             ]]);
 
-        $this->specify('it ignores files which are positioned in the head section', function () {
+        $this->specify('it allows to ignore files and scripts by position', function () {
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addModule' => function ($name) {
+                        return $this->tester->mockModuleInterface();
+                    }
+                ])
+            ]);
+
+            $loader->getView()->assetBundles = [
+                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                    'js' => [
+                        ['file1', 'position' => View::POS_HEAD],
+                        'file2'
+                    ]
+                ]),
+                'test2' => Stub::makeEmpty(AssetBundle::className(), [
+                    'js' => [
+                        ['file1', 'position' => View::POS_READY],
+                        'file2'
+                    ],
+                    'jsOptions' => [
+                        'position' => View::POS_LOAD
+                    ]
+                ]),
+            ];
+
+            $loader->setIgnorePositions([View::POS_HEAD, View::POS_LOAD]);
+
+            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
+            verify($loader->registerAssetBundle('test2'))->false();
+        });
+
+        $this->specify('it ignores files which are positioned in the head section by default', function () {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => Stub::once(function ($name) {
@@ -289,7 +323,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
 
-        $this->specify('it ignores asset bundles listed in the ignoreBundles property', function() {
+        $this->specify('it ignores asset bundles listed in the ignoreBundles property', function () {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => Stub::once(function ($name) {
