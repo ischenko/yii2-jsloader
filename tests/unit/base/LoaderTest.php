@@ -378,7 +378,7 @@ class LoaderTest extends \Codeception\Test\Unit
             ],
         ];
 
-        $this->specify('it collects and clears JS blocks (except head blocks) registered in the view', function () {
+        $this->specify('it collects and clears JS blocks (except head blocks by default) registered in the view', function () {
             unset(
                 $this->view->js[View::POS_READY],
                 $this->view->js[View::POS_LOAD]
@@ -388,16 +388,12 @@ class LoaderTest extends \Codeception\Test\Unit
                 'view' => $this->view,
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
-                    verify($codeBlocks)->equals([
-                        View::POS_END => [
-                            'code' => "end code block",
-                            'depends' => []
-                        ],
-                        View::POS_BEGIN => [
-                            'code' => "begin code block",
-                            'depends' => []
-                        ],
-                    ]);
+                    verify($codeBlocks)->hasKey(View::POS_END);
+                    verify($codeBlocks[View::POS_END])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_END]->getExpression())->equals('end code block');
+                    verify($codeBlocks)->hasKey(View::POS_BEGIN);
+                    verify($codeBlocks[View::POS_BEGIN])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_BEGIN]->getExpression())->equals('begin code block');
                 }),
             ], $this);
 
@@ -465,11 +461,11 @@ class LoaderTest extends \Codeception\Test\Unit
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
-                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
-                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file2.js']]);
+                    verify($codeBlocks[View::POS_BEGIN])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_BEGIN]->getDependencies())->equals([$this->modules['/file1.js'], $this->modules['/file2.js']]);
                     verify($codeBlocks)->hasKey(View::POS_END);
-                    verify($codeBlocks[View::POS_END])->hasKey('depends');
-                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules['/file1.js'], $this->modules['/file4.js']]);
+                    verify($codeBlocks[View::POS_END])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_END]->getDependencies())->equals([$this->modules['/file1.js'], $this->modules['/file4.js']]);
                 })
             ], $this);
 
@@ -480,7 +476,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
 
-        $this->specify('it gets modules for specific position and adds them as dependencies to appropriate code block', function () {
+        $this->specify('it gets modules for specific position and adds them to appropriate code section', function () {
             $this->modules = [
                 $this->tester->mockModuleInterface([
                     'getName' => 'test1',
@@ -508,12 +504,26 @@ class LoaderTest extends \Codeception\Test\Unit
                 'doRender' => Stub::once(function ($codeBlocks) {
                     verify($codeBlocks)->internalType('array');
                     verify($codeBlocks)->hasntKey(View::POS_HEAD);
+                    verify($codeBlocks)->hasKey(View::POS_LOAD);
+                    verify($codeBlocks[View::POS_LOAD])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_LOAD]->getDependencies())->equals([]);
+                    verify($codeBlocks[View::POS_LOAD]->getExpression())->internalType('string');
+                    verify($codeBlocks[View::POS_LOAD]->getExpression())->equals('load code block');
+                    verify($codeBlocks)->hasKey(View::POS_READY);
+                    verify($codeBlocks[View::POS_READY])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_READY]->getDependencies())->equals([]);
+                    verify($codeBlocks[View::POS_READY]->getExpression())->internalType('string');
+                    verify($codeBlocks[View::POS_READY]->getExpression())->equals('ready code block');
                     verify($codeBlocks)->hasKey(View::POS_BEGIN);
-                    verify($codeBlocks[View::POS_BEGIN])->hasKey('depends');
-                    verify($codeBlocks[View::POS_BEGIN]['depends'])->equals([$this->modules[1], $this->modules[2]]);
+                    verify($codeBlocks[View::POS_BEGIN])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_BEGIN]->getDependencies())->equals([$this->modules[1], $this->modules[2]]);
+                    verify($codeBlocks[View::POS_BEGIN]->getExpression())->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_BEGIN]->getExpression()->getExpression())->equals('begin code block');
                     verify($codeBlocks)->hasKey(View::POS_END);
-                    verify($codeBlocks[View::POS_END])->hasKey('depends');
-                    verify($codeBlocks[View::POS_END]['depends'])->equals([$this->modules[3]]);
+                    verify($codeBlocks[View::POS_END])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_END]->getDependencies())->equals([$this->modules[3]]);
+                    verify($codeBlocks[View::POS_END]->getExpression())->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
+                    verify($codeBlocks[View::POS_END]->getExpression()->getExpression())->equals('end code block');
                 })
             ], $this);
 

@@ -7,6 +7,7 @@
 
 namespace ischenko\yii2\jsloader\base;
 
+use ischenko\yii2\jsloader\helpers\JsExpression;
 use Yii;
 use yii\base\Object;
 use yii\web\View;
@@ -66,9 +67,9 @@ abstract class Loader extends Object implements LoaderInterface
     /**
      * Performs actual rendering of the JS loader
      *
-     * @param array $codeBlocks a list of js code blocks indexed by position
+     * @param JsExpression[] $jsExpressions a list of js expressions indexed by position
      */
-    abstract protected function doRender(array $codeBlocks);
+    abstract protected function doRender(array $jsExpressions);
 
     /**
      * @return \yii\web\View the view object associated with the loader
@@ -131,7 +132,11 @@ abstract class Loader extends Object implements LoaderInterface
             $module = $config->addModule($name);
         }
 
-        $module->setOptions(array_merge(['position' => View::POS_END], $bundle->jsOptions));
+        if (!isset($bundle->jsOptions['position'])) {
+            $bundle->jsOptions['position'] = View::POS_END;
+        }
+
+        $module->setOptions($bundle->jsOptions);
 
         foreach ($bundle->depends as $dependency) {
             if (($dependency = $this->registerAssetBundle($dependency)) !== false) {
@@ -139,7 +144,7 @@ abstract class Loader extends Object implements LoaderInterface
             }
         }
 
-        $bundle->js = $this->importJsFilesFromBundle($bundle, $module);
+        $this->importJsFilesFromBundle($bundle, $module);
 
         return $module;
     }
@@ -151,9 +156,7 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function processAssets()
     {
-        $codeBlocks = [];
-        $config = $this->getConfig();
-        $positionFilter = new PositionFilter();
+        $jsExpressions = [];
 
         foreach ([
                      View::POS_HEAD,
@@ -167,20 +170,14 @@ abstract class Loader extends Object implements LoaderInterface
                 continue;
             }
 
-            $positionFilter->setValue($position);
-
-            $code = $this->importJsCodeFromView($position);
-            $depends = $config->getModules($positionFilter);
-            $depends = array_merge($depends, $this->importJsFilesFromView($position));
-
-            if (empty($code) && empty($depends)) {
+            if (($jsExpression = $this->createJsExpression($position)) === null) {
                 continue;
             }
 
-            $codeBlocks[$position] = ['code' => $code, 'depends' => $depends];
+            $jsExpressions[$position] = $jsExpression;
         }
 
-        $this->doRender($codeBlocks);
+        $this->doRender($jsExpressions);
     }
 
     /**
@@ -196,6 +193,32 @@ abstract class Loader extends Object implements LoaderInterface
         }
 
         return $runtimePath;
+    }
+
+    /**
+     * @param integer $position
+     *
+     * @return JsExpression
+     */
+    private function createJsExpression($position)
+    {
+        $jsExpression = null;
+
+        $modules = $this->getConfig()
+            ->getModules(new PositionFilter($position));
+
+        $code = $this->importJsCodeFromView($position);
+        $depends = $this->importJsFilesFromView($position);
+
+        if (!empty($code) || !empty($depends)) {
+            $jsExpression = new JsExpression($code, $depends);
+        }
+
+        if ($modules !== []) {
+            $jsExpression = new JsExpression($jsExpression, $modules);
+        }
+
+        return $jsExpression;
     }
 
     /**
@@ -272,8 +295,6 @@ abstract class Loader extends Object implements LoaderInterface
     /**
      * @param AssetBundle $bundle
      * @param ModuleInterface $module
-     *
-     * @return array a list of ignored files
      */
     private function importJsFilesFromBundle(AssetBundle $bundle, ModuleInterface $module)
     {
@@ -297,6 +318,6 @@ abstract class Loader extends Object implements LoaderInterface
             $module->addFile($assetManager->getAssetUrl($bundle, $file), $options);
         }
 
-        return $ignoredJs;
+        $bundle->js = $ignoredJs;
     }
 }
