@@ -52,11 +52,11 @@ abstract class Loader extends Object implements LoaderInterface
      */
     public function __construct(View $view, array $config = [])
     {
-        parent::__construct($config);
-
         $this->view = $view;
         $this->setIgnoreBundles([]);
         $this->setIgnorePositions([View::POS_HEAD]);
+
+        parent::__construct($config);
     }
 
     /**
