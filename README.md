@@ -24,7 +24,7 @@ composer require ischenko/yii2-jsloader
 or add
 
 ```json
-"ischenko/yii2-jsloader": "*",
+"ischenko/yii2-jsloader": "*"
 ```
 
 to the `require` section of your composer.json.

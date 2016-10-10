@@ -26,7 +26,7 @@ use yii\web\View;
 class Behavior extends \yii\base\Behavior
 {
     /**
-     * @var LoaderInterface
+     * @var LoaderInterface|array
      */
     private $loader = [];
 
