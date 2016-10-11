@@ -188,7 +188,7 @@ class LoaderTest extends \Codeception\Test\Unit
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => $this->tester->mockModuleInterface([
                         'setOptions' => Stub::once(function ($options) use ($bundle) {
-                            verify($options)->equals(array_merge(['position' => View::POS_END], $bundle->jsOptions));
+                            verify($options)->equals(array_merge(['position' => View::POS_END, 'baseUrl' => null], $bundle->jsOptions));
                         })
                     ], $this)
                 ])
@@ -201,7 +201,29 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->verifyMockObjects();
         });
 
-        $this->specify('it ignores asset bundles which are positioned in the head section', function () {
+        $this->specify('it adds base url from asset bundle to a module settings', function () {
+            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+                'baseUrl' => '/base/url'
+            ]);
+
+            $loader = $this->tester->mockBaseLoader([
+                'getConfig' => $this->tester->mockConfigInterface([
+                    'addModule' => $this->tester->mockModuleInterface([
+                        'setOptions' => Stub::once(function ($options) use ($bundle) {
+                            verify($options)->equals(['position' => View::POS_END, 'baseUrl' => '/base/url']);
+                        })
+                    ], $this)
+                ])
+            ]);
+
+            $loader->getView()->assetBundles['test'] = $bundle;
+
+            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+
+            $this->verifyMockObjects();
+        });
+
+        $this->specify('it ignores asset bundles which are positioned in the head section by default', function () {
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
                     'addModule' => Stub::once(function ($name) {
