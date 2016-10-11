@@ -69,6 +69,8 @@ class JsExpressionTest extends \Codeception\Test\Unit
             verify($expression->getDependencies())->equals([]);
             verify($expression->setDependencies([$m = $this->tester->mockModuleInterface()]))->same($expression);
             verify($expression->getDependencies())->equals([$m]);
+            verify($expression->setDependencies([$m = $this->tester->mockModuleInterface()]))->same($expression);
+            verify($expression->getDependencies())->equals([$m]);
         });
 
         $this->specify('it throws an exception if dependency does not implement ModuleInterface', function ($value) {

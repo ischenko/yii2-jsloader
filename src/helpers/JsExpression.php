@@ -79,6 +79,8 @@ class JsExpression
      */
     public function setDependencies(array $dependencies)
     {
+        $this->dependencies = [];
+
         foreach ($dependencies as $dependency) {
             if (!($dependency instanceof ModuleInterface)) {
                 throw new InvalidParamException('Dependency must implement ModuleInterface');
