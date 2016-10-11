@@ -65,6 +65,7 @@ interface ModuleInterface
 
     /**
      * @param array $options options for a module
+     * @return $this
      */
     public function setOptions(array $options);
 

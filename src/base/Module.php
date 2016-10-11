@@ -138,10 +138,13 @@ class Module implements ModuleInterface
 
     /**
      * @param array $options options for a module
+     * @return $this
      */
     public function setOptions(array $options)
     {
         $this->options = $options;
+
+        return $this;
     }
 
     /**

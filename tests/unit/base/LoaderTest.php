@@ -45,8 +45,7 @@ class LoaderTest extends \Codeception\Test\Unit
     {
         $loader = $this->tester->mockBaseLoader();
 
-        $loader->setConfig(['prop' => 'val']);
-
+        verify($loader->setConfig(['prop' => 'val']))->same($loader);
         verify_that(property_exists($loader->getConfig(), 'prop'));
 
         $config = clone $loader->getConfig();

@@ -29,6 +29,7 @@ interface LoaderInterface
      * Sets new configuration for the loader
      *
      * @param ConfigInterface|array $config
+     * @return $this
      */
     public function setConfig($config);
 

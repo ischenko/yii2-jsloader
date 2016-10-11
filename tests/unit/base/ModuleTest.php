@@ -122,7 +122,7 @@ class ModuleTest extends \Codeception\Test\Unit
     {
         $module = $this->mockModule();
         verify($module->getOptions())->equals([]);
-        $module->setOptions(['test' => 1]);
+        verify($module->setOptions(['test' => 1]))->same($module);
         verify($module->getOptions())->equals(['test' => 1]);
     }
 

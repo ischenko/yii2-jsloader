@@ -30,6 +30,11 @@ abstract class Loader extends Object implements LoaderInterface
     const RUNTIME_DIR = '@runtime/jsloader';
 
     /**
+     * @var string
+     */
+    public $baseUrl;
+
+    /**
      * @var View
      */
     private $view;
@@ -99,6 +104,7 @@ abstract class Loader extends Object implements LoaderInterface
      * Sets new configuration for the loader
      *
      * @param ConfigInterface|array $config
+     * @return $this
      */
     public function setConfig($config)
     {
@@ -111,6 +117,8 @@ abstract class Loader extends Object implements LoaderInterface
         foreach ((array)$config as $key => $value) {
             $configObject->$key = $value;
         }
+
+        return $this;
     }
 
     /**
