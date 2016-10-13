@@ -54,7 +54,6 @@ class FilterTest extends \Codeception\Test\Unit
         verify($filter->filter($data))->equals(['test', 'hello', 'world']);
     }
 
-
     public function testValueProperty()
     {
         $position = $this->mockFilter([], [1]);

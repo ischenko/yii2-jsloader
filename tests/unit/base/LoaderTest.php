@@ -501,19 +501,27 @@ class LoaderTest extends \Codeception\Test\Unit
             $this->modules = [
                 $this->tester->mockModuleInterface([
                     'getName' => 'test1',
+                    'getFiles' => ['test' => []],
                     'getOptions' => ['position' => View::POS_HEAD]
                 ]),
                 $this->tester->mockModuleInterface([
                     'getName' => 'test2',
+                    'getFiles' => ['test' => []],
                     'getOptions' => ['position' => View::POS_BEGIN]
                 ]),
                 $this->tester->mockModuleInterface([
                     'getName' => 'test3',
+                    'getFiles' => ['test' => []],
                     'getOptions' => ['position' => View::POS_BEGIN]
                 ]),
                 $this->tester->mockModuleInterface([
                     'getName' => 'test4',
+                    'getFiles' => ['test' => []],
                     'getOptions' => ['position' => View::POS_END]
+                ]),
+                $this->tester->mockModuleInterface([
+                    'getName' => 'test5',
+                    'getOptions' => ['position' => View::POS_BEGIN]
                 ]),
             ];
 

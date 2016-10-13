@@ -7,7 +7,6 @@
 
 namespace ischenko\yii2\jsloader\base;
 
-use ischenko\yii2\jsloader\helpers\JsExpression;
 use Yii;
 use yii\base\Object;
 use yii\web\View;
@@ -16,8 +15,11 @@ use yii\helpers\FileHelper;
 use ischenko\yii2\jsloader\LoaderInterface;
 use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
+use ischenko\yii2\jsloader\helpers\JsExpression;
+use ischenko\yii2\jsloader\filters\Chain as ChainFilter;
 use ischenko\yii2\jsloader\filters\Position as PositionFilter;
 use ischenko\yii2\jsloader\filters\ClassName as ClassNameFilter;
+use ischenko\yii2\jsloader\filters\NotEmptyFiles as NotEmptyFilesFilter;
 
 /**
  * Base class for JS loaders
@@ -209,13 +211,19 @@ abstract class Loader extends Object implements LoaderInterface
      */
     private function createJsExpression($position)
     {
-        $jsExpression = null;
+        $chainFilter = new ChainFilter(
+            [
+                new PositionFilter($position),
+                new NotEmptyFilesFilter()
+            ]
+            , ChainFilter::LOGICAL_AND
+        );
 
-        $modules = $this->getConfig()
-            ->getModules(new PositionFilter($position));
-
+        $modules = $this->getConfig()->getModules($chainFilter);
         $code = $this->importJsCodeFromView($position);
         $depends = $this->importJsFilesFromView($position);
+
+        $jsExpression = null;
 
         if (!empty($code) || !empty($depends)) {
             $jsExpression = new JsExpression($code, $depends);
