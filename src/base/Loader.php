@@ -12,6 +12,7 @@ use yii\base\Object;
 use yii\web\View;
 use yii\web\AssetBundle;
 use yii\helpers\FileHelper;
+use yii\base\InvalidConfigException;
 use ischenko\yii2\jsloader\LoaderInterface;
 use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
@@ -29,12 +30,15 @@ use ischenko\yii2\jsloader\filters\NotEmptyFiles as NotEmptyFilesFilter;
  */
 abstract class Loader extends Object implements LoaderInterface
 {
-    const RUNTIME_DIR = '@runtime/jsloader';
-
     /**
      * @var View
      */
     private $view;
+
+    /**
+     * @var string
+     */
+    public $runtimePath = '@runtime/jsloader';
 
     /**
      * @var ClassNameFilter
@@ -194,14 +198,19 @@ abstract class Loader extends Object implements LoaderInterface
      */
     protected function getRuntimePath()
     {
-        static $runtimePath;
+        static $runtimePath = [];
 
-        if ($runtimePath === null) {
-            $runtimePath = Yii::getAlias(self::RUNTIME_DIR);
-            FileHelper::createDirectory($runtimePath);
+        if (!isset($runtimePath[$this->runtimePath])) {
+            $rtPath = Yii::getAlias($this->runtimePath);
+
+            if (!FileHelper::createDirectory($rtPath)) {
+                throw new InvalidConfigException('Cannot create runtime folder "' . $rtPath . '"');
+            }
+
+            $runtimePath[$this->runtimePath] = $rtPath;
         }
 
-        return $runtimePath;
+        return $runtimePath[$this->runtimePath];
     }
 
     /**
