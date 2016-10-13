@@ -21,6 +21,11 @@ use ischenko\yii2\jsloader\ModuleInterface;
 abstract class Config extends Object implements ConfigInterface
 {
     /**
+     * @var string
+     */
+    public $baseUrl;
+
+    /**
      * @var ModuleInterface[]
      */
     private $modules = [];

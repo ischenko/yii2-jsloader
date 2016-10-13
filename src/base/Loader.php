@@ -30,11 +30,6 @@ abstract class Loader extends Object implements LoaderInterface
     const RUNTIME_DIR = '@runtime/jsloader';
 
     /**
-     * @var string
-     */
-    public $baseUrl;
-
-    /**
      * @var View
      */
     private $view;
