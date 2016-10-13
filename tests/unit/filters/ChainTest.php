@@ -77,20 +77,33 @@ class ChainTest extends \Codeception\Test\Unit
     public function testMatch($filters, $operator, $data, $expected)
     {
         $filter = new ChainFilter($filters, $operator);
-        verify_that($filter->match($data) === $expected);
+        verify($filter->match($data))->notNull();
+        verify($filter->match($data))->equals($expected);
     }
 
     public function matchTestDataProvider()
     {
-        $test1 = $this->mockBaseFilter(['match' => function($v) { return $v === 'test1'; }]);
-        $test2 = $this->mockBaseFilter(['match' => function($v) { return $v === 'test2'; }]);
-
         return [
             [[], ChainFilter::LOGICAL_OR, 'test', false],
             [[], ChainFilter::LOGICAL_AND, 'test', false],
-            [[$test1, $test2], ChainFilter::LOGICAL_OR, 'test1', true],
-            [[$test1, $test2], ChainFilter::LOGICAL_AND, 'test1', false],
-            [[$test1, $test1], ChainFilter::LOGICAL_AND, 'test1', true],
+
+            [[$this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test1';
+            }]), $this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test2';
+            }])], ChainFilter::LOGICAL_OR, 'test2', true],
+
+            [[$this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test1';
+            }]), $this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test2';
+            }])], ChainFilter::LOGICAL_AND, 'test1', false],
+
+            [[$this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test1';
+            }]), $this->mockBaseFilter(['match' => function ($v) {
+                return $v === 'test1';
+            }])], ChainFilter::LOGICAL_AND, 'test1', true],
         ];
     }
 
