@@ -9,7 +9,7 @@
     "assets"
   ],
   "support": {
-      "issues": "https://github.com/ischenko/yii2-jsloader/issues?state=open",
+      "issues": "https://github.com/ischenko/yii2-jsloader/issues",
       "source": "https://github.com/ischenko/yii2-jsloader"
   },
   "type": "yii2-extension",
@@ -20,6 +20,7 @@
       "email": "roman@ishchenko.ck.ua"
     }
   ],
+  "minimum-stability": "stable",
   "require": {
     "php": ">=5.4.0",
     "yiisoft/yii2": "^2.0.4"
@@ -27,7 +28,7 @@
   "require-dev": {
     "codeception/verify": "*",
     "codeception/specify": "*",
-    "codeception/codeception": "2.2.*"
+    "codeception/codeception": "*"
   },
   "autoload": {
     "psr-4": {
