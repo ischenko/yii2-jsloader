@@ -121,6 +121,14 @@ class ModuleTest extends \Codeception\Test\Unit
     public function testOptionsProperty()
     {
         $module = $this->mockModule();
+        verify($module->getBaseUrl())->equals('');
+        verify($module->setOptions(['baseUrl' => 'test']))->same($module);
+        verify($module->getBaseUrl())->equals('test');
+    }
+
+    public function testBaseUrlGetter()
+    {
+        $module = $this->mockModule();
         verify($module->getOptions())->equals([]);
         verify($module->setOptions(['test' => 1]))->same($module);
         verify($module->getOptions())->equals(['test' => 1]);

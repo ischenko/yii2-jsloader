@@ -154,4 +154,13 @@ class Module implements ModuleInterface
     {
         return $this->options;
     }
+
+    /**
+     * @return string base URL for a module
+     */
+    public function getBaseUrl()
+    {
+        return isset($this->options['baseUrl'])
+            ? $this->options['baseUrl'] : '';
+    }
 }

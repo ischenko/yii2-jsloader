@@ -21,6 +21,11 @@ interface ModuleInterface
     public function getName();
 
     /**
+     * @return string base URL for a module
+     */
+    public function getBaseUrl();
+
+    /**
      * Adds JS file into a module
      *
      * @param string $file URL of a file
