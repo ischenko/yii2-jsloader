@@ -96,8 +96,6 @@ class JsExpressionTest extends \Codeception\Test\Unit
             $expression = new JsExpression('test');
 
             verify($expression->render($renderer))->equals('test');
-
-            $this->verifyMockObjects();
         });
     }
 }

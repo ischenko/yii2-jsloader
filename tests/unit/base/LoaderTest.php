@@ -119,8 +119,6 @@ class LoaderTest extends \Codeception\Test\Unit
             ];
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it loads files from asset bundle', function () {
@@ -146,8 +144,6 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->getView()->assetBundles['test'] = $bundle;
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it clears js files in an asset bundle after loading', function () {
@@ -197,8 +193,6 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->getView()->assetBundles['test'] = $bundle;
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it adds base url from asset bundle to a module settings', function () {
@@ -219,8 +213,6 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->getView()->assetBundles['test'] = $bundle;
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it ignores asset bundles which are positioned in the head section by default', function () {
@@ -248,8 +240,6 @@ class LoaderTest extends \Codeception\Test\Unit
 
             verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
             verify($loader->registerAssetBundle('test2'))->false();
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('each file can have its own settings',
@@ -276,8 +266,6 @@ class LoaderTest extends \Codeception\Test\Unit
                 $loader->getView()->assetBundles['test'] = $bundle;
 
                 verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-
-                $this->verifyMockObjects();
             },
             ['examples' => [
                 ['file1.js', 'file1.js', []],
@@ -340,8 +328,6 @@ class LoaderTest extends \Codeception\Test\Unit
 
             verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
             verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it ignores asset bundles listed in the ignoreBundles property', function () {
@@ -368,8 +354,6 @@ class LoaderTest extends \Codeception\Test\Unit
 
             verify($loader->registerAssetBundle('test1'))->false();
             verify($loader->registerAssetBundle('test2'))->false();
-
-            $this->verifyMockObjects();
         });
     }
 
@@ -425,8 +409,6 @@ class LoaderTest extends \Codeception\Test\Unit
                     'test' => 'head code block'
                 ]
             ]);
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it skips empty sections', function () {
@@ -493,8 +475,6 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader->processAssets();
 
             verify($this->view->jsFiles)->equals([]);
-
-            $this->verifyMockObjects();
         });
 
         $this->specify('it gets modules for specific position and adds them to appropriate code section', function () {
@@ -561,8 +541,6 @@ class LoaderTest extends \Codeception\Test\Unit
             }
 
             $loader->processAssets();
-
-            $this->verifyMockObjects();
         });
     }
 

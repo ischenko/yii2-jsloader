@@ -124,9 +124,6 @@ class BehaviorTest extends \Codeception\Test\Unit
 
                 $this->behavior->setLoader($loader);
                 $this->behavior->processBundles();
-
-                $this->verifyMockObjects();
-
             }, ['examples' => [
                 [[]],
                 [['bundle' => false]],
