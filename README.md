@@ -96,4 +96,5 @@ Additionally you can set a list of an asset bundles that should be ignored by th
     ...
 ```
 
-**License:** MIT
+##License
+**MIT**
