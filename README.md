@@ -32,6 +32,7 @@ to the `require` section of your composer.json.
 ## Usage
 
 Add the behavior and concrete loader implementation to a view configuration
+
 ```php
     ...
     'components' => [
@@ -41,6 +42,52 @@ Add the behavior and concrete loader implementation to a view configuration
                 'class' => 'ischenko\yii2\jsloader\Behavior',
                 'loader' => [
                     'class' => 'loader\namespace\LoaderClass'
+                ]
+            ]
+        ]
+        ...
+    ]
+    ...
+```
+
+By default the loader skips scripts and bundles/files located in [the head section](http://www.yiiframework.com/doc-2.0/yii-web-view.html#POS_HEAD-detail), 
+but if you need to include those scripts or exclude another section(s) you can do this via `ignorePositions` property:
+
+```php
+    ...
+    'components' => [
+        ...
+        'view' => [
+            'as jsLoader' => [
+                'class' => 'ischenko\yii2\jsloader\Behavior',
+                'loader' => [
+                    'class' => 'loader\namespace\LoaderClass',
+                    'ignorePositions' => [
+                        View::POS_HEAD,
+                        View::POS_BEGIN
+                    ]
+                ]
+            ]
+        ]
+        ...
+    ]
+    ...
+```
+
+Additionally you can set a list of an asset bundles that should be ignored by the loader via `ignoreBundles` property:
+
+```php
+    ...
+    'components' => [
+        ...
+        'view' => [
+            'as jsLoader' => [
+                'class' => 'ischenko\yii2\jsloader\Behavior',
+                'loader' => [
+                    'class' => 'loader\namespace\LoaderClass',
+                    'ignoreBundles' => [
+                        'app\assets\AppCssAsset'
+                    ]
                 ]
             ]
         ]
