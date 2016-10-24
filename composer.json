@@ -27,7 +27,7 @@
   },
   "require-dev": {
     "codeception/verify": "*",
-    "codeception/specify": "*",
+    "codeception/specify": "0.4.4",
     "codeception/codeception": "*"
   },
   "autoload": {
