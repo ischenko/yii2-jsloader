@@ -114,14 +114,14 @@ class ModuleTest extends \Codeception\Test\Unit
 
             $module->addDependency($dep1 = $this->mockModule()->addFile('fiel'));
 
-            verify($module->getDependencies())->equals([spl_object_hash($dep1) => $dep1]);
+            verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
 
             $dep2 = $this->mockModule()->addDependency($dep1);
 
             $module->clearDependencies();
             $module->addDependency($dep2);
 
-            verify($module->getDependencies())->equals([spl_object_hash($dep1) => $dep1]);
+            verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
         });
     }
 
@@ -163,7 +163,7 @@ class ModuleTest extends \Codeception\Test\Unit
 
         $module->addDependency($dep1 = $this->mockModule()->addFile('fiel'));
 
-        verify($module->getDependencies())->equals([spl_object_hash($dep1) => $dep1]);
+        verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
         verify($module->clearDependencies())->same($module);
         verify($module->getDependencies())->equals([]);
     }

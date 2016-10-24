@@ -119,7 +119,7 @@ class Module implements ModuleInterface
             return $this;
         }
 
-        $this->dependencies[spl_object_hash($depends)] = $depends;
+        $this->dependencies[$depends->getName()] = $depends;
 
         return $this;
     }
