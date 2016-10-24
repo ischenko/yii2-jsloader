@@ -111,7 +111,15 @@ class Module implements ModuleInterface
      */
     public function addDependency(ModuleInterface $depends)
     {
-        $this->dependencies[] = $depends;
+        if ($depends->getFiles() === []) {
+            foreach ($depends->getDependencies() as $dependency) {
+                $this->addDependency($dependency);
+            }
+
+            return $this;
+        }
+
+        $this->dependencies[spl_object_hash($depends)] = $depends;
 
         return $this;
     }
