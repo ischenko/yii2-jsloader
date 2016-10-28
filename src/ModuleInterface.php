@@ -21,6 +21,20 @@ interface ModuleInterface
     public function getName();
 
     /**
+     * Sets alias name for a module
+     *
+     * @param string $alias
+     *
+     * @return $this
+     */
+    public function setAlias($alias);
+
+    /**
+     * @return string an alias for a module or name (see [[getName()]]) if alias not set
+     */
+    public function getAlias();
+
+    /**
      * @return string base URL for a module
      */
     public function getBaseUrl();

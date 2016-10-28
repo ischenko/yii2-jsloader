@@ -39,6 +39,11 @@ class Module implements ModuleInterface
     private $dependencies = [];
 
     /**
+     * @var string alias name
+     */
+    private $alias;
+
+    /**
      * Module constructor
      *
      * @param string $name
@@ -58,6 +63,36 @@ class Module implements ModuleInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Sets alias name for a module
+     *
+     * @param string $alias
+     *
+     * @return $this
+     */
+    public function setAlias($alias)
+    {
+        if (!is_string($alias)) {
+            throw new InvalidParamException('Alias must be a string');
+        }
+
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+    /**
+     * @return string an alias for a module or name (see [[getName()]]) if alias not set
+     */
+    public function getAlias()
+    {
+        if (!$this->alias) {
+            return $this->getName();
+        }
+
+        return $this->alias;
     }
 
     /**

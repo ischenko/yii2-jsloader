@@ -83,4 +83,21 @@ class ConfigTest extends \Codeception\Test\Unit
         verify($config->getModules(new Position(2)))->equals([]);
         verify($config->getModules(new Position(3)))->equals([$module2, $module3]);
     }
+
+    public function testAliasesSetter()
+    {
+        $config = $this->mockConfig();
+
+        $m3 = $config->addModule('test3');
+
+        verify($config->setAliases(['test1' => 'testing', 'test2' => 'testing123', 'test3' => 'zzz']))->same($config);
+
+        verify($m1 = $config->getModule('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($m2 = $config->getModule('test2'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($config->getModule('test3'))->same($m3);
+
+        verify($m1->getAlias())->equals('testing');
+        verify($m2->getAlias())->equals('testing123');
+        verify($m3->getAlias())->equals('zzz');
+    }
 }

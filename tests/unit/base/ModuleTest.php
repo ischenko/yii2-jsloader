@@ -167,4 +167,23 @@ class ModuleTest extends \Codeception\Test\Unit
         verify($module->clearDependencies())->same($module);
         verify($module->getDependencies())->equals([]);
     }
+
+    public function testAliasSetter()
+    {
+        $this->module = $this->mockModule();
+
+        verify($this->module->getAlias())->equals($this->module->getName());
+        verify($this->module->setAlias('alias'))->same($this->module);
+        verify($this->module->getAlias())->equals('alias');
+        verify($this->module->setAlias(''))->same($this->module);
+        verify($this->module->getAlias())->equals($this->module->getName());
+
+        $this->specify('it throws an exception if alias is not a string', function($alias) {
+            $this->module->setAlias($alias);
+        }, ['throws' => 'yii\base\InvalidParamException', 'examples' => [
+            [null],
+            [new \stdClass()],
+            [[]]
+        ]]);
+    }
 }

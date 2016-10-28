@@ -151,6 +151,7 @@ abstract class Loader extends Object implements LoaderInterface
 
         $module->setOptions($options);
 
+        // TODO: think about optimization
         foreach ($bundle->depends as $dependency) {
             if (($dependency = $this->registerAssetBundle($dependency)) !== false) {
                 $module->addDependency($dependency);

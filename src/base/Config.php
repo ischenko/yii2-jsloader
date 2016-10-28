@@ -38,6 +38,26 @@ abstract class Config extends Object implements ConfigInterface
     abstract public function toArray();
 
     /**
+     * Sets aliases for modules
+     *
+     * @param array $aliases a list of aliases, where keys are modules name and value is an alias
+     *
+     * @return $this
+     */
+    public function setAliases(array $aliases)
+    {
+        foreach ($aliases as $name => $alias) {
+            if (!($module = $this->getModule($name))) {
+                $module = $this->addModule($name);
+            }
+
+            $module->setAlias($alias);
+        }
+
+        return $this;
+    }
+
+    /**
      * Adds new module into configuration
      *
      * If passed a string a new module will be created if it does not exist yet
