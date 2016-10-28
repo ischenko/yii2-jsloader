@@ -34,6 +34,7 @@ class ModuleTest extends \Codeception\Test\Unit
         $module = $this->mockModule();
 
         verify($module)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($module)->isInstanceOf('yii\base\Object');
     }
 
     public function testConstruct()

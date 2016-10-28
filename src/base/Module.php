@@ -16,7 +16,7 @@ use ischenko\yii2\jsloader\ModuleInterface;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-class Module implements ModuleInterface
+class Module extends \yii\base\Object implements ModuleInterface
 {
     /**
      * @var string
@@ -50,6 +50,8 @@ class Module implements ModuleInterface
      */
     public function __construct($name)
     {
+        parent::__construct([]);
+
         if (empty($name) || !is_string($name)) {
             throw new InvalidParamException('Name must be a string and cannot be empty');
         }
