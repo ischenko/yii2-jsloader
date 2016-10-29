@@ -29,6 +29,9 @@
     "codeception/specify": "*",
     "codeception/codeception": "*"
   },
+  "suggest": {
+    "ischenko/yii2-jsloader-requirejs": "RequireJS loader"
+  },
   "autoload": {
     "psr-4": {
       "ischenko\\yii2\\jsloader\\": "src/"
