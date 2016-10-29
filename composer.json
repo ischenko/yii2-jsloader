@@ -1,6 +1,6 @@
 {
   "name": "ischenko/yii2-jsloader",
-  "description": "An Yii2 extension designed to handle JS files, code and asset bundles by various js loaders",
+  "description": "An Yii2 extension designed to handle JS files, code and asset bundles via various js loaders",
   "keywords": [
     "yii2",
     "view",
