@@ -1,8 +1,11 @@
 # yii2-jsloader
 
+[![Latest Stable Version](https://poser.pugx.org/ischenko/yii2-jsloader/v/stable)](https://packagist.org/packages/ischenko/yii2-jsloader)
+[![Total Downloads](https://poser.pugx.org/ischenko/yii2-jsloader/downloads)](https://packagist.org/packages/ischenko/yii2-jsloader)
 [![Build Status](https://travis-ci.org/ischenko/yii2-jsloader.svg?branch=master)](https://travis-ci.org/ischenko/yii2-jsloader)
 [![Code Climate](https://codeclimate.com/github/ischenko/yii2-jsloader/badges/gpa.svg)](https://codeclimate.com/github/ischenko/yii2-jsloader)
 [![Test Coverage](https://codeclimate.com/github/ischenko/yii2-jsloader/badges/coverage.svg)](https://codeclimate.com/github/ischenko/yii2-jsloader/coverage)
+[![License](https://poser.pugx.org/ischenko/yii2-jsloader/license)](https://packagist.org/packages/ischenko/yii2-jsloader)
 
 An extension provides behavior which allows to process js files, code and asset bundles by various js loaders such as [RequireJS](http://requirejs.org).
 
@@ -95,6 +98,3 @@ Additionally you can set a list of an asset bundles that should be ignored by th
     ]
     ...
 ```
-
-##License
-**MIT**
