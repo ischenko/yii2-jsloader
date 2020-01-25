@@ -8,8 +8,8 @@
 namespace ischenko\yii2\jsloader\helpers;
 
 use ischenko\yii2\jsloader\JsRendererInterface;
-use yii\base\InvalidParamException;
 use ischenko\yii2\jsloader\ModuleInterface;
+use yii\base\InvalidArgumentException;
 
 /**
  * JsExpression helper
@@ -62,9 +62,9 @@ class JsExpression
     public function setExpression($expression)
     {
         if (!is_string($expression) && !($expression instanceof JsExpression)) {
-            throw new InvalidParamException('Expression must be a string or an instance of JsExpression');
+            throw new InvalidArgumentException('Expression must be a string or an instance of JsExpression');
         } elseif (($expression instanceof JsExpression) && $this === $expression) {
-            throw new InvalidParamException('Expression cannot reference on self');
+            throw new InvalidArgumentException('Expression cannot reference on self');
         }
 
         $this->expression = $expression;
@@ -83,7 +83,7 @@ class JsExpression
 
         foreach ($dependencies as $dependency) {
             if (!($dependency instanceof ModuleInterface)) {
-                throw new InvalidParamException('Dependency must implement ModuleInterface');
+                throw new InvalidArgumentException('Dependency must implement ModuleInterface');
             }
 
             $this->dependencies[] = $dependency;

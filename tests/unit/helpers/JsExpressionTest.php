@@ -2,15 +2,21 @@
 
 namespace ischenko\yii2\jsloader\tests\unit\filters;
 
+use Codeception\AssertThrows;
+use Codeception\Specify;
+use Codeception\Stub\Expected;
+use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\helpers\JsExpression;
+use ischenko\yii2\jsloader\tests\UnitTester;
 
-class JsExpressionTest extends \Codeception\Test\Unit
+class JsExpressionTest extends Unit
 {
-    use \Codeception\Specify;
+    use AssertThrows;
+    use Specify;
 
     /**
-     * @var \ischenko\yii2\jsloader\tests\UnitTester
+     * @var UnitTester
      */
     protected $tester;
 
@@ -47,19 +53,25 @@ class JsExpressionTest extends \Codeception\Test\Unit
             verify($expression->getExpression())->same($e);
         });
 
-        $this->specify('it throws an exception if expression is not a string or JsExpression object', function ($value) {
-            $expression = new JsExpression();
-            $expression->setExpression($value);
-        }, ['throws' => 'yii\base\InvalidParamException', 'examples' => [
-            [[]],
-            [false],
-            [$this]
-        ]]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('it throws an exception if expression is not a string or JsExpression object',
+                function ($value) {
+                    $expression = new JsExpression();
+                    $expression->setExpression($value);
+                }, [
+                    'examples' => [
+                        [[]],
+                        [false],
+                        [$this]
+                    ]
+                ]);
+        });
 
-        $this->specify('it throws an exception if expression is self-reference', function () {
+        // it throws an exception if expression is self-reference
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
             $expression = new JsExpression();
             $expression->setExpression($expression);
-        }, ['throws' => 'yii\base\InvalidParamException']);
+        });
     }
 
     public function testDependenciesProperty()
@@ -73,22 +85,27 @@ class JsExpressionTest extends \Codeception\Test\Unit
             verify($expression->getDependencies())->equals([$m]);
         });
 
-        $this->specify('it throws an exception if dependency does not implement ModuleInterface', function ($value) {
-            $expression = new JsExpression();
-            $expression->setDependencies([$value]);
-        }, ['throws' => 'yii\base\InvalidParamException', 'examples' => [
-            [[]],
-            ['dep'],
-            [false],
-            [$this]
-        ]]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('it throws an exception if dependency does not implement ModuleInterface',
+                function ($value) {
+                    $expression = new JsExpression();
+                    $expression->setDependencies([$value]);
+                }, [
+                    'examples' => [
+                        [[]],
+                        ['dep'],
+                        [false],
+                        [$this]
+                    ]
+                ]);
+        });
     }
 
     public function testRender()
     {
         $this->specify('it passes self-reference to renderer and returns render JS string', function () {
             $renderer = Stub::makeEmpty('ischenko\yii2\jsloader\JsRendererInterface', [
-                'renderJsExpression' => Stub::once(function ($expression) {
+                'renderJsExpression' => Expected::once(function ($expression) {
                     return $expression->getExpression();
                 })
             ], $this);

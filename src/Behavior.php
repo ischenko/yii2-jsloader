@@ -7,8 +7,8 @@
 
 namespace ischenko\yii2\jsloader;
 
+use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
-use yii\base\InvalidParamException;
 use yii\web\View;
 
 /**
@@ -83,12 +83,12 @@ class Behavior extends \yii\base\Behavior
     /**
      * @param LoaderInterface|array $loader
      *
-     * @throws InvalidParamException
+     * @throws InvalidArgumentException
      */
     public function setLoader($loader)
     {
         if (!is_array($loader) && !($loader instanceof LoaderInterface)) {
-            throw new InvalidParamException('Argument should be an array or implement LoaderInterface');
+            throw new InvalidArgumentException('Argument should be an array or implement LoaderInterface');
         }
 
         $this->loader = $loader;
@@ -105,7 +105,13 @@ class Behavior extends \yii\base\Behavior
     protected function ensureView($object)
     {
         if (!($object instanceof View)) {
-            throw new InvalidConfigException('"yii\web\View" instance expected, got "' . get_class($object) . '"');
+            $message = '"yii\web\View" instance expected';
+
+            if (is_object($object)) {
+                $message .= ', got "' . get_class($object) . '"';
+            }
+
+            throw new InvalidConfigException($message);
         }
 
         return $object;

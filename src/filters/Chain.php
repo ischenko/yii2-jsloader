@@ -56,7 +56,7 @@ class Chain implements FilterInterface
     public function setOperator($operator)
     {
         if (!in_array($operator, [self::LOGICAL_OR, self::LOGICAL_AND], true)) {
-            throw new \yii\base\InvalidParamException('Operator value can be only 0 or 1');
+            throw new \yii\base\InvalidArgumentException('Operator value can be only 0 or 1');
         }
 
         $this->operator = $operator;
@@ -69,7 +69,7 @@ class Chain implements FilterInterface
     {
         foreach ($filters as $filter) {
             if (!($filter instanceof FilterInterface)) {
-                throw new \yii\base\InvalidParamException(
+                throw new \yii\base\InvalidArgumentException(
                     'Value must be an array of objects that implement FilterInterface'
                 );
             }

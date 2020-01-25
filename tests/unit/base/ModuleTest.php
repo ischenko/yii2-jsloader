@@ -2,15 +2,27 @@
 
 namespace ischenko\yii2\jsloader\tests\unit\base;
 
+use Codeception\AssertThrows;
+use Codeception\Specify;
+use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\base\Module;
+use ischenko\yii2\jsloader\tests\UnitTester;
+use stdClass;
 
-class ModuleTest extends \Codeception\Test\Unit
+class ModuleTest extends Unit
 {
-    use \Codeception\Specify;
+    use AssertThrows;
+    use Specify;
 
     /**
-     * @var \ischenko\yii2\jsloader\tests\UnitTester
+     * @var Module
+     * @specify
+     */
+    public $module;
+
+    /**
+     * @var UnitTester
      */
     protected $tester;
 
@@ -34,7 +46,7 @@ class ModuleTest extends \Codeception\Test\Unit
         $module = $this->mockModule();
 
         verify($module)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-        verify($module)->isInstanceOf('yii\base\Object');
+        verify($module)->isInstanceOf('yii\base\BaseObject');
     }
 
     public function testConstruct()
@@ -43,14 +55,18 @@ class ModuleTest extends \Codeception\Test\Unit
 
         verify($module->getName())->equals('test');
 
-        $this->specify('it throws an exception if name is not a string or is an empty string', function ($name) {
-            new Module($name);
-        }, ['throws' => 'yii\base\InvalidParamException', 'examples' => [
-            [null],
-            [['array']],
-            [''],
-            [$module]
-        ]]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () use ($module) {
+            $this->specify('it throws an exception if name is not a string or is an empty string', function ($name) {
+                new Module($name);
+            }, [
+                'examples' => [
+                    [null],
+                    [['array']],
+                    [''],
+                    [$module]
+                ]
+            ]);
+        });
     }
 
     public function testAddFile()
@@ -61,42 +77,52 @@ class ModuleTest extends \Codeception\Test\Unit
             verify($this->module->addFile('file'))->same($this->module);
         });
 
-        $this->specify('it throws an exception if filename is not a string or is an empty string', function ($file) {
-            $this->module->addFile($file);
-        }, [
-            'examples' => [
-                [['array']], [$this->module], [''], [false], [1]
-            ],
-            'throws' => 'yii\base\InvalidParamException'
-        ]);
-
-        $this->specify('it throws an exception if options is not an array', function ($options) {
-            $this->module->addFile('file', $options);
-        }, [
-            'examples' => [
-                ['string'], [1], [$this->module]
-            ],
-            'throws' => 'yii\base\InvalidParamException'
-        ]);
-
-        $this->specify('it inserts file into the internal storage and provides access to them through getter', function () {
-            $module = $this->module;
-
-            verify($module->getFiles())->internalType('array');
-            verify($module->getFiles())->equals([]);
-
-            $module->addFile('file1');
-
-            verify($module->getFiles())->equals(['file1' => []]);
-
-            $module->addFile('file2', ['option' => 1]);
-
-            verify($module->getFiles())->equals(['file1' => [], 'file2' => ['option' => 1]]);
-
-            $module->addFile('file1', ['option' => 2]);
-
-            verify($module->getFiles())->equals(['file1' => ['option' => 2], 'file2' => ['option' => 1]]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('it throws an exception if filename is not a string or is an empty string',
+                function ($file) {
+                    $this->module->addFile($file);
+                }, [
+                    'examples' => [
+                        [['array']],
+                        [$this->module],
+                        [''],
+                        [false],
+                        [1]
+                    ]
+                ]);
         });
+
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('it throws an exception if options is not an array', function ($options) {
+                $this->module->addFile('file', $options);
+            }, [
+                'examples' => [
+                    ['string'],
+                    [1],
+                    [$this->module]
+                ]
+            ]);
+        });
+
+        $this->specify('it inserts file into the internal storage and provides access to them through getter',
+            function () {
+                $module = $this->module;
+
+                verify($module->getFiles())->array();
+                verify($module->getFiles())->equals([]);
+
+                $module->addFile('file1');
+
+                verify($module->getFiles())->equals(['file1' => []]);
+
+                $module->addFile('file2', ['option' => 1]);
+
+                verify($module->getFiles())->equals(['file1' => [], 'file2' => ['option' => 1]]);
+
+                $module->addFile('file1', ['option' => 2]);
+
+                verify($module->getFiles())->equals(['file1' => ['option' => 2], 'file2' => ['option' => 1]]);
+            });
     }
 
     public function testAddDependency()
@@ -107,23 +133,24 @@ class ModuleTest extends \Codeception\Test\Unit
             verify($this->module->addDependency($this->mockModule()))->same($this->module);
         });
 
-        $this->specify('it inserts dependencies data into the internal storage and provides access to them through getter', function () {
-            $module = $this->module;
+        $this->specify('it inserts dependencies data into the internal storage and provides access to them through getter',
+            function () {
+                $module = $this->module;
 
-            verify($module->getDependencies())->internalType('array');
-            verify($module->getDependencies())->equals([]);
+                verify($module->getDependencies())->array();
+                verify($module->getDependencies())->equals([]);
 
-            $module->addDependency($dep1 = $this->mockModule()->addFile('fiel'));
+                $module->addDependency($dep1 = $this->mockModule()->addFile('fiel'));
 
-            verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
+                verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
 
-            $dep2 = $this->mockModule()->addDependency($dep1);
+                $dep2 = $this->mockModule()->addDependency($dep1);
 
-            $module->clearDependencies();
-            $module->addDependency($dep2);
+                $module->clearDependencies();
+                $module->addDependency($dep2);
 
-            verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
-        });
+                verify($module->getDependencies())->equals([$dep1->getName() => $dep1]);
+            });
     }
 
     public function testOptionsProperty()
@@ -179,12 +206,16 @@ class ModuleTest extends \Codeception\Test\Unit
         verify($this->module->setAlias(''))->same($this->module);
         verify($this->module->getAlias())->equals($this->module->getName());
 
-        $this->specify('it throws an exception if alias is not a string', function($alias) {
-            $this->module->setAlias($alias);
-        }, ['throws' => 'yii\base\InvalidParamException', 'examples' => [
-            [null],
-            [new \stdClass()],
-            [[]]
-        ]]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('it throws an exception if alias is not a string', function ($alias) {
+                $this->module->setAlias($alias);
+            }, [
+                'examples' => [
+                    [null],
+                    [new stdClass()],
+                    [[]]
+                ]
+            ]);
+        });
     }
 }

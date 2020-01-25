@@ -44,8 +44,8 @@ class PositionTest extends \Codeception\Test\Unit
             [1, [1], false],
             [1, ['position' => ''], false],
             [1, ['position' => 1], true],
-            [1, Stub::makeEmpty('ischenko\yii2\jsloader\ModuleInterface',['getOptions' => []]), false],
-            [1, Stub::makeEmpty('ischenko\yii2\jsloader\ModuleInterface',['getOptions' => ['position' => 1]]), true],
+            [1, Stub::makeEmpty('ischenko\yii2\jsloader\ModuleInterface', ['getOptions' => []]), false],
+            [1, Stub::makeEmpty('ischenko\yii2\jsloader\ModuleInterface', ['getOptions' => ['position' => 1]]), true],
         ];
     }
 }

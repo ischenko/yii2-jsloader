@@ -7,8 +7,9 @@
 
 namespace ischenko\yii2\jsloader\base;
 
-use yii\base\InvalidParamException;
 use ischenko\yii2\jsloader\ModuleInterface;
+use yii\base\BaseObject;
+use yii\base\InvalidArgumentException;
 
 /**
  * Base implementation of module
@@ -16,7 +17,7 @@ use ischenko\yii2\jsloader\ModuleInterface;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-class Module extends \yii\base\Object implements ModuleInterface
+class Module extends BaseObject implements ModuleInterface
 {
     /**
      * @var string
@@ -53,7 +54,7 @@ class Module extends \yii\base\Object implements ModuleInterface
         parent::__construct([]);
 
         if (empty($name) || !is_string($name)) {
-            throw new InvalidParamException('Name must be a string and cannot be empty');
+            throw new InvalidArgumentException('Name must be a string and cannot be empty');
         }
 
         $this->name = $name;
@@ -77,7 +78,7 @@ class Module extends \yii\base\Object implements ModuleInterface
     public function setAlias($alias)
     {
         if (!is_string($alias)) {
-            throw new InvalidParamException('Alias must be a string');
+            throw new InvalidArgumentException('Alias must be a string');
         }
 
         $this->alias = $alias;
@@ -104,14 +105,14 @@ class Module extends \yii\base\Object implements ModuleInterface
      * @param array $options options for given file
      *
      * @return $this
-     * @throws InvalidParamException
+     * @throws InvalidArgumentException
      */
     public function addFile($file, $options = [])
     {
         if (empty($file) || !is_string($file)) {
-            throw new InvalidParamException('Filename must be a string and cannot be empty');
+            throw new InvalidArgumentException('Filename must be a string and cannot be empty');
         } elseif (!is_array($options)) {
-            throw new InvalidParamException('Options value must be an array');
+            throw new InvalidArgumentException('Options value must be an array');
         }
 
         $this->files[$file] = $options;

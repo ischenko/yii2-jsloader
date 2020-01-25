@@ -2,15 +2,22 @@
 
 namespace ischenko\yii2\jsloader\tests\unit;
 
-use Codeception\Util\Stub;
+use Codeception\AssertThrows;
+use Codeception\Specify;
+use Codeception\Stub\Expected;
+use Codeception\Test\Unit;
 use ischenko\yii2\jsloader\Behavior;
+use ischenko\yii2\jsloader\tests\UnitTester;
+use stdClass;
+use yii\web\View;
 
-class BehaviorTest extends \Codeception\Test\Unit
+class BehaviorTest extends Unit
 {
-    use \Codeception\Specify;
+    use AssertThrows;
+    use Specify;
 
     /**
-     * @var \ischenko\yii2\jsloader\tests\UnitTester
+     * @var UnitTester
      */
     protected $tester;
 
@@ -37,13 +44,13 @@ class BehaviorTest extends \Codeception\Test\Unit
     {
         $events = $this->behavior->events();
 
-        verify($events)->internalType('array');
+        verify($events)->array();
 
-        verify($events)->hasKey(\yii\web\View::EVENT_END_BODY);
-        verify($events[\yii\web\View::EVENT_END_BODY])->notEmpty();
+        verify($events)->hasKey(View::EVENT_END_BODY);
+        verify($events[View::EVENT_END_BODY])->notEmpty();
 
-        verify($events)->hasKey(\yii\web\View::EVENT_END_PAGE);
-        verify($events[\yii\web\View::EVENT_END_PAGE])->notEmpty();
+        verify($events)->hasKey(View::EVENT_END_PAGE);
+        verify($events[View::EVENT_END_PAGE])->notEmpty();
     }
 
     public function testEnsureView()
@@ -57,7 +64,7 @@ class BehaviorTest extends \Codeception\Test\Unit
         verify($actual)->same($view);
 
         $t->expectException('yii\base\InvalidConfigException', function () use ($ensureView) {
-            $ensureView->invokeArgs($this->behavior, [new \stdClass()]);
+            $ensureView->invokeArgs($this->behavior, [new stdClass()]);
         });
     }
 
@@ -76,7 +83,7 @@ class BehaviorTest extends \Codeception\Test\Unit
 
         $this->behavior->attach($this->tester->mockView());
 
-        $this->specify('it accepts array as argument', function() {
+        $this->specify('it accepts array as argument', function () {
             $stub = $this->tester->mockBaseLoader();
 
             $this->behavior->setLoader(['class' => get_class($stub)]);
@@ -84,32 +91,36 @@ class BehaviorTest extends \Codeception\Test\Unit
             verify($this->behavior->getLoader())->isInstanceOf(get_class($stub));
         });
 
-        $this->specify('setter throws an exception', function () {
-            $this->specify('if argument is not an array or an object that implements loader interface', function ($value) {
-                $this->behavior->setLoader($value);
-            }, [
-                'examples' => [
-                    ['string'],
-                    [123],
-                    [$this->behavior],
-                    [function () {
-                    }]
-                ],
-                'throws' => 'yii\base\InvalidParamException'
-            ]);
+        $this->assertThrows('yii\base\InvalidArgumentException', function () {
+            $this->specify('if argument is not an array or an object that implements loader interface',
+                function ($value) {
+                    $this->behavior->setLoader($value);
+                }, [
+                    'examples' => [
+                        ['string'],
+                        [123],
+                        [$this->behavior],
+                        [
+                            function () {
+                            }
+                        ]
+                    ]
+                ]);
         });
 
-        $this->specify('getter throws an exception if object does not implement LoaderInterface', function () {
+        // getter throws an exception if object does not implement LoaderInterface
+        $this->assertThrows('yii\base\InvalidConfigException', function () {
             $this->behavior->setLoader(['class' => '\ArrayObject']);
             $this->behavior->getLoader();
-        }, ['throws' => 'yii\base\InvalidConfigException']);
+        });
     }
 
     public function testProcessBundles()
     {
-        $this->specify('it throws an exception if owner is not an instance of yii\web\View object', function () {
+        // it throws an exception if owner is not an instance of yii\web\View object
+        $this->assertThrows('yii\base\InvalidConfigException', function () {
             $this->behavior->processBundles();
-        }, ['throws' => 'yii\base\InvalidConfigException']);
+        });
 
         $this->specify('it walks through a list of asset bundles and passes their names to a js loader',
             function ($bundles) {
@@ -119,23 +130,24 @@ class BehaviorTest extends \Codeception\Test\Unit
                 $view->assetBundles = $bundles;
 
                 $loader = $this->tester->mockLoaderInterface([
-                    'registerAssetBundle' => Stub::exactly(count($bundles))
+                    'registerAssetBundle' => Expected::exactly(count($bundles))
                 ], $this);
 
                 $this->behavior->setLoader($loader);
                 $this->behavior->processBundles();
-            }, ['examples' => [
-                [[]],
-                [['bundle' => false]],
-                [['bundle_1' => false, 'bundle_2' => false]],
-            ]]);
-
+            }, [
+                'examples' => [
+                    [[]],
+                    [['bundle' => false]],
+                    [['bundle_1' => false, 'bundle_2' => false]],
+                ]
+            ]);
     }
 
     public function testProcessAssets()
     {
         $loader = $this->tester->mockLoaderInterface([
-            'processAssets' => Stub::once()
+            'processAssets' => Expected::once()
         ], $this);
 
         $this->behavior->setLoader($loader);

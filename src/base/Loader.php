@@ -7,20 +7,20 @@
 
 namespace ischenko\yii2\jsloader\base;
 
-use Yii;
-use yii\base\Object;
-use yii\web\View;
-use yii\web\AssetBundle;
-use yii\helpers\FileHelper;
-use yii\base\InvalidConfigException;
-use ischenko\yii2\jsloader\LoaderInterface;
 use ischenko\yii2\jsloader\ConfigInterface;
-use ischenko\yii2\jsloader\ModuleInterface;
-use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\filters\Chain as ChainFilter;
-use ischenko\yii2\jsloader\filters\Position as PositionFilter;
 use ischenko\yii2\jsloader\filters\ClassName as ClassNameFilter;
 use ischenko\yii2\jsloader\filters\NotEmptyFiles as NotEmptyFilesFilter;
+use ischenko\yii2\jsloader\filters\Position as PositionFilter;
+use ischenko\yii2\jsloader\helpers\JsExpression;
+use ischenko\yii2\jsloader\LoaderInterface;
+use ischenko\yii2\jsloader\ModuleInterface;
+use Yii;
+use yii\base\BaseObject;
+use yii\base\InvalidConfigException;
+use yii\helpers\FileHelper;
+use yii\web\AssetBundle;
+use yii\web\View;
 
 /**
  * Base class for JS loaders
@@ -28,7 +28,7 @@ use ischenko\yii2\jsloader\filters\NotEmptyFiles as NotEmptyFilesFilter;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-abstract class Loader extends Object implements LoaderInterface
+abstract class Loader extends BaseObject implements LoaderInterface
 {
     /**
      * @var View

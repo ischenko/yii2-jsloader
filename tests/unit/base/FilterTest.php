@@ -2,8 +2,8 @@
 
 namespace ischenko\yii2\jsloader\tests\unit\base;
 
+use Codeception\Stub\Expected;
 use Codeception\Util\Stub;
-use ischenko\yii2\jsloader\base\Filter;
 
 class FilterTest extends \Codeception\Test\Unit
 {
@@ -47,9 +47,11 @@ class FilterTest extends \Codeception\Test\Unit
             'world'
         ];
 
-        $filter = $this->mockFilter(['match' => Stub::exactly(5, function($data) {
-            return !is_numeric($data);
-        })]);
+        $filter = $this->mockFilter([
+            'match' => Expected::exactly(5, function ($data) {
+                return !is_numeric($data);
+            })
+        ]);
 
         verify($filter->filter($data))->equals(['test', 'hello', 'world']);
     }

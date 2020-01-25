@@ -7,10 +7,10 @@
 
 namespace ischenko\yii2\jsloader\base;
 
-use yii\base\Object;
-use ischenko\yii2\jsloader\FilterInterface;
 use ischenko\yii2\jsloader\ConfigInterface;
+use ischenko\yii2\jsloader\FilterInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
+use yii\base\BaseObject;
 
 /**
  * Base implementation for the configuration
@@ -18,7 +18,7 @@ use ischenko\yii2\jsloader\ModuleInterface;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-abstract class Config extends Object implements ConfigInterface
+abstract class Config extends BaseObject implements ConfigInterface
 {
     /**
      * @var string

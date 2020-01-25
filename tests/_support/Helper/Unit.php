@@ -1,15 +1,21 @@
 <?php
+
 namespace ischenko\yii2\jsloader\tests\Helper;
 
 // here you can define custom actions
 // all public methods declared in helper class will be available in $I
 
+use Codeception\Module;
 use Codeception\Util\Stub;
-
+use ischenko\yii2\jsloader\ConfigInterface;
+use ischenko\yii2\jsloader\LoaderInterface;
+use ischenko\yii2\jsloader\ModuleInterface;
+use ReflectionClass;
+use ReflectionProperty;
 use yii\web\AssetManager;
 use yii\web\View;
 
-class Unit extends \Codeception\Module
+class Unit extends Module
 {
     /**
      * @return View
@@ -26,7 +32,7 @@ class Unit extends \Codeception\Module
     }
 
     /**
-     * @return \ischenko\yii2\jsloader\LoaderInterface
+     * @return LoaderInterface
      */
     public function mockLoaderInterface($params = [], $testCase = false)
     {
@@ -34,7 +40,7 @@ class Unit extends \Codeception\Module
     }
 
     /**
-     * @return \ischenko\yii2\jsloader\ModuleInterface
+     * @return ModuleInterface
      */
     public function mockModuleInterface($params = [], $testCase = false)
     {
@@ -42,7 +48,7 @@ class Unit extends \Codeception\Module
     }
 
     /**
-     * @return \ischenko\yii2\jsloader\ConfigInterface
+     * @return ConfigInterface
      */
     public function mockConfigInterface($params = [], $testCase = false)
     {
@@ -72,11 +78,11 @@ class Unit extends \Codeception\Module
      * @param mixed $object
      * @param string $property
      *
-     * @return \ReflectionProperty
+     * @return ReflectionProperty
      */
     public function getProperty($object, $property)
     {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
 
         $property = $reflection->getProperty($property);
         $property->setAccessible(true);
@@ -95,7 +101,7 @@ class Unit extends \Codeception\Module
      */
     public function getMethod($object, $method, $arguments = [])
     {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
 
         $method = $reflection->getMethod($method);
         $method->setAccessible(true);

@@ -3,7 +3,6 @@
 namespace ischenko\yii2\jsloader\tests\unit\base;
 
 use Codeception\Util\Stub;
-use ischenko\yii2\jsloader\base\Config;
 use ischenko\yii2\jsloader\filters\Position;
 
 class ConfigTest extends \Codeception\Test\Unit
@@ -22,7 +21,7 @@ class ConfigTest extends \Codeception\Test\Unit
 
     protected function mockConfig($params = [], $testCase = false)
     {
-         $params = array_merge([
+        $params = array_merge([
             'toArray' => []
         ], $params);
 
@@ -35,7 +34,7 @@ class ConfigTest extends \Codeception\Test\Unit
     {
         $config = $this->mockConfig();
 
-        verify($config)->isInstanceOf('yii\base\Object');
+        verify($config)->isInstanceOf('yii\base\BaseObject');
         verify($config)->isInstanceOf('ischenko\yii2\jsloader\ConfigInterface');
     }
 
@@ -46,7 +45,7 @@ class ConfigTest extends \Codeception\Test\Unit
 
         verify($module)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
 
-        $this->tester->expectException('yii\base\InvalidParamException', function() use ($config) {
+        $this->tester->expectException('yii\base\InvalidArgumentException', function () use ($config) {
             $config->addModule('');
         });
 

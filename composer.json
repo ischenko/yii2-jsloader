@@ -21,13 +21,15 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
-    "yiisoft/yii2": "^2.0.4"
+    "php": ">=7.2.0",
+    "yiisoft/yii2": "~2.0"
   },
   "require-dev": {
-    "codeception/verify": "*",
-    "codeception/specify": "*",
-    "codeception/codeception": "*"
+    "codeception/verify": "~1.2",
+    "codeception/specify": "~1.2",
+    "codeception/codeception": "~4.0",
+    "codeception/assert-throws": "~1.0",
+    "codeception/module-asserts": "~1.1"
   },
   "suggest": {
     "ischenko/yii2-jsloader-requirejs": "RequireJS loader"
