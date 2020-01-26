@@ -18,13 +18,14 @@ cache:
 install:
   - |
   - travis_retry composer self-update && composer --version
-  - travis_retry composer global require "fxp/composer-asset-plugin:~1.2"
-#  - travis_retry composer require "codeclimate/php-test-reporter:*" --dev
+  - travis_retry composer config -g use-github-api 0
+  - travis_retry composer global require "fxp/composer-asset-plugin:^1.4"
+  - travis_retry composer require "codeclimate/php-test-reporter:*" --dev
   - travis_retry composer update --no-interaction
 
 script:
   - vendor/bin/codecept run $CODECEPT_FLAGS
 
-#addons:
-#  code_climate:
-#    repo_token: 6de12a6628148efa91e508e53cdaaba1fefdbb3c3bb37360a0982dd32730ebc8
+addons:
+  code_climate:
+    repo_token: 6de12a6628148efa91e508e53cdaaba1fefdbb3c3bb37360a0982dd32730ebc8
