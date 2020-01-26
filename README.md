@@ -15,7 +15,7 @@ Currently available implementations of js loaders are:
  - [yii2-jsloader-requirejs](https://github.com/ischenko/yii2-jsloader-requirejs)
 
 ## Installation
-*Requires PHP >= 5.4.*
+*Requires PHP >= 7.1
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
