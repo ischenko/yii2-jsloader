@@ -122,7 +122,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
      *
      * @return ModuleInterface|false an instance of registered module or false if asset bundle was not registered
      */
-    public function registerAssetBundle($name)
+    public function registerAssetBundle(string $name)
     {
         if (($bundle = $this->getAssetBundleFromView($name)) === false) {
             return $bundle;

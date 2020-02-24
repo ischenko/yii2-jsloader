@@ -30,8 +30,6 @@ class Position extends Filter
             $data = $data->getOptions();
         }
 
-        $position = isset($data['position']) ? $data['position'] : $data;
-
-        return in_array($position, (array)$this->getValue());
+        return in_array($data['position'] ?? $data, (array)$this->getValue());
     }
 }
