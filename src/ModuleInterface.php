@@ -18,7 +18,7 @@ interface ModuleInterface
     /**
      * @return string a name associated with a module
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Sets alias name for a module
@@ -27,17 +27,17 @@ interface ModuleInterface
      *
      * @return $this
      */
-    public function setAlias($alias);
+    public function setAlias($alias): ModuleInterface;
 
     /**
      * @return string an alias for a module or name (see [[getName()]]) if alias not set
      */
-    public function getAlias();
+    public function getAlias(): string;
 
     /**
      * @return string base URL for a module
      */
-    public function getBaseUrl();
+    public function getBaseUrl(): string;
 
     /**
      * Adds JS file into a module
@@ -47,19 +47,19 @@ interface ModuleInterface
      *
      * @return $this
      */
-    public function addFile($file, $options = []);
+    public function addFile($file, $options = []): ModuleInterface;
 
     /**
      * @return array a list of files and their options, indexed by filename
      */
-    public function getFiles();
+    public function getFiles(): array;
 
     /**
      * Clears all files from a module
      *
      * @return $this
      */
-    public function clearFiles();
+    public function clearFiles(): ModuleInterface;
 
     /**
      * Adds dependency to a module
@@ -68,28 +68,28 @@ interface ModuleInterface
      *
      * @return $this
      */
-    public function addDependency(ModuleInterface $depends);
+    public function addDependency(ModuleInterface $depends): ModuleInterface;
 
     /**
      * @return ModuleInterface[] a list of dependencies of a module
      */
-    public function getDependencies();
+    public function getDependencies(): array;
 
     /**
      * Clears all dependencies from a module
      *
      * @return $this
      */
-    public function clearDependencies();
+    public function clearDependencies(): ModuleInterface;
 
     /**
      * @param array $options options for a module
      * @return $this
      */
-    public function setOptions(array $options);
+    public function setOptions(array $options): ModuleInterface;
 
     /**
      * @return array a list of assigned options
      */
-    public function getOptions();
+    public function getOptions(): array;
 }

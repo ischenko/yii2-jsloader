@@ -63,9 +63,17 @@ class Module extends BaseObject implements ModuleInterface
     /**
      * @return string a name associated with a module
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return string an alias for a module or name (see [[getName()]]) if alias not set
+     */
+    public function getAlias(): string
+    {
+        return $this->alias ?: $this->getName();
     }
 
     /**
@@ -75,7 +83,7 @@ class Module extends BaseObject implements ModuleInterface
      *
      * @return $this
      */
-    public function setAlias($alias)
+    public function setAlias($alias): ModuleInterface
     {
         if (!is_string($alias)) {
             throw new InvalidArgumentException('Alias must be a string');
@@ -87,18 +95,6 @@ class Module extends BaseObject implements ModuleInterface
     }
 
     /**
-     * @return string an alias for a module or name (see [[getName()]]) if alias not set
-     */
-    public function getAlias()
-    {
-        if (!$this->alias) {
-            return $this->getName();
-        }
-
-        return $this->alias;
-    }
-
-    /**
      * Adds JS file into a module
      *
      * @param string $file URL of a file
@@ -107,7 +103,7 @@ class Module extends BaseObject implements ModuleInterface
      * @return $this
      * @throws InvalidArgumentException
      */
-    public function addFile($file, $options = [])
+    public function addFile($file, $options = []): ModuleInterface
     {
         if (empty($file) || !is_string($file)) {
             throw new InvalidArgumentException('Filename must be a string and cannot be empty');
@@ -123,7 +119,7 @@ class Module extends BaseObject implements ModuleInterface
     /**
      * @return array a list of files and their options, indexed by filename
      */
-    public function getFiles()
+    public function getFiles(): array
     {
         return $this->files;
     }
@@ -133,7 +129,7 @@ class Module extends BaseObject implements ModuleInterface
      *
      * @return $this
      */
-    public function clearFiles()
+    public function clearFiles(): ModuleInterface
     {
         $this->files = [];
 
@@ -147,7 +143,7 @@ class Module extends BaseObject implements ModuleInterface
      *
      * @return $this
      */
-    public function addDependency(ModuleInterface $depends)
+    public function addDependency(ModuleInterface $depends): ModuleInterface
     {
         if ($depends->getFiles() === []) {
             foreach ($depends->getDependencies() as $dependency) {
@@ -165,7 +161,7 @@ class Module extends BaseObject implements ModuleInterface
     /**
      * @return ModuleInterface[] a list of dependencies of a module
      */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return $this->dependencies;
     }
@@ -175,7 +171,7 @@ class Module extends BaseObject implements ModuleInterface
      *
      * @return $this
      */
-    public function clearDependencies()
+    public function clearDependencies(): ModuleInterface
     {
         $this->dependencies = [];
 
@@ -183,10 +179,18 @@ class Module extends BaseObject implements ModuleInterface
     }
 
     /**
+     * @return array a list of assigned options
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
      * @param array $options options for a module
      * @return $this
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): ModuleInterface
     {
         $this->options = $options;
 
@@ -194,19 +198,10 @@ class Module extends BaseObject implements ModuleInterface
     }
 
     /**
-     * @return array a list of assigned options
-     */
-    public function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
      * @return string base URL for a module
      */
-    public function getBaseUrl()
+    public function getBaseUrl(): string
     {
-        return isset($this->options['baseUrl'])
-            ? $this->options['baseUrl'] : '';
+        return $this->options['baseUrl'] ?? '';
     }
 }

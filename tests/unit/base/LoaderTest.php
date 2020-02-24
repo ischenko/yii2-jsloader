@@ -4,6 +4,7 @@ namespace ischenko\yii2\jsloader\tests\unit\base;
 
 use Codeception\Stub\Expected;
 use Codeception\Util\Stub;
+use ischenko\yii2\jsloader\ModuleInterface;
 use yii\helpers\Html;
 use yii\web\AssetBundle;
 use yii\web\View;
@@ -22,11 +23,6 @@ class LoaderTest extends \Codeception\Test\Unit
      * @var \ischenko\yii2\jsloader\tests\UnitTester
      */
     protected $tester;
-
-    protected function _before()
-    {
-        parent::_before();
-    }
 
     /** Tests go below */
 
@@ -108,7 +104,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
                     'getModule' => $this->tester->mockModuleInterface([
-                        'addDependency' => Expected::exactly(3)
+                        'addDependency' => Expected::exactly(3, $this->makeEmpty(ModuleInterface::class))
                     ], $this)
                 ])
             ]);
@@ -144,6 +140,7 @@ class LoaderTest extends \Codeception\Test\Unit
                     'getModule' => $this->tester->mockModuleInterface([
                         'addFile' => Expected::exactly(4, function ($file) use ($bundle) {
                             verify($bundle->js)->contains($file);
+                            return $this->makeEmpty(ModuleInterface::class);
                         })
                     ], $this)
                 ])
@@ -194,6 +191,7 @@ class LoaderTest extends \Codeception\Test\Unit
                         'setOptions' => Expected::once(function ($options) use ($bundle) {
                             verify($options)->equals(array_merge(['position' => View::POS_END, 'baseUrl' => null],
                                 $bundle->jsOptions));
+                            return $this->makeEmpty(ModuleInterface::class);
                         })
                     ], $this)
                 ])
@@ -214,6 +212,7 @@ class LoaderTest extends \Codeception\Test\Unit
                     'addModule' => $this->tester->mockModuleInterface([
                         'setOptions' => Expected::once(function ($options) use ($bundle) {
                             verify($options)->equals(['position' => View::POS_END, 'baseUrl' => '/base/url']);
+                            return $this->makeEmpty(ModuleInterface::class);
                         })
                     ], $this)
                 ])
@@ -270,6 +269,7 @@ class LoaderTest extends \Codeception\Test\Unit
                                 verify($file)->equals($expectedFile);
                                 verify($options)->array();
                                 verify($options)->equals($expectedOptions);
+                                return $this->makeEmpty(ModuleInterface::class);
                             }, $this)
                         ])
                     ])
@@ -574,5 +574,10 @@ class LoaderTest extends \Codeception\Test\Unit
         $rtPath = $this->tester->getMethod($loader, 'getRuntimePath');
 
         verify($rtPath->invoke($loader))->equals(\Yii::getAlias('@runtime/jsloader'));
+    }
+
+    protected function _before()
+    {
+        parent::_before();
     }
 }

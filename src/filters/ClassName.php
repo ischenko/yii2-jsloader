@@ -23,7 +23,7 @@ class ClassName extends Filter
      * @param mixed $data
      * @return boolean
      */
-    public function match($data)
+    public function match($data): bool
     {
         if (is_object($data)) {
             $data = get_class($data);

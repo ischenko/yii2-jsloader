@@ -7,8 +7,8 @@
 
 namespace ischenko\yii2\jsloader\filters;
 
-use ischenko\yii2\jsloader\base\Filter;
 use ischenko\yii2\jsloader\FilterInterface;
+use yii\base\InvalidArgumentException;
 
 /**
  * Chain filter
@@ -56,26 +56,10 @@ class Chain implements FilterInterface
     public function setOperator($operator)
     {
         if (!in_array($operator, [self::LOGICAL_OR, self::LOGICAL_AND], true)) {
-            throw new \yii\base\InvalidArgumentException('Operator value can be only 0 or 1');
+            throw new InvalidArgumentException('Operator value can be only 0 or 1');
         }
 
         $this->operator = $operator;
-    }
-
-    /**
-     * @param FilterInterface[] $filters
-     */
-    public function setFilters(array $filters)
-    {
-        foreach ($filters as $filter) {
-            if (!($filter instanceof FilterInterface)) {
-                throw new \yii\base\InvalidArgumentException(
-                    'Value must be an array of objects that implement FilterInterface'
-                );
-            }
-        }
-
-        $this->filters = $filters;
     }
 
     /**
@@ -87,12 +71,28 @@ class Chain implements FilterInterface
     }
 
     /**
+     * @param FilterInterface[] $filters
+     */
+    public function setFilters(array $filters)
+    {
+        foreach ($filters as $filter) {
+            if (!($filter instanceof FilterInterface)) {
+                throw new InvalidArgumentException(
+                    'Value must be an array of objects that implement FilterInterface'
+                );
+            }
+        }
+
+        $this->filters = $filters;
+    }
+
+    /**
      * Performs filtering of given array
      *
      * @param array $data
      * @return array filtered data
      */
-    public function filter(array $data)
+    public function filter(array $data): array
     {
         $filteredData = [];
 
@@ -111,7 +111,7 @@ class Chain implements FilterInterface
      * @param mixed $data
      * @return boolean
      */
-    public function match($data)
+    public function match($data): bool
     {
         $match = false;
         $operator = $this->getOperator();

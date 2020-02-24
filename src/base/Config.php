@@ -35,7 +35,7 @@ abstract class Config extends BaseObject implements ConfigInterface
      *
      * @return array
      */
-    abstract public function toArray();
+    abstract public function toArray(): array;
 
     /**
      * Sets aliases for modules
@@ -44,7 +44,7 @@ abstract class Config extends BaseObject implements ConfigInterface
      *
      * @return $this
      */
-    public function setAliases(array $aliases)
+    public function setAliases(array $aliases): ConfigInterface
     {
         foreach ($aliases as $name => $alias) {
             if (!($module = $this->getModule($name))) {
@@ -66,7 +66,7 @@ abstract class Config extends BaseObject implements ConfigInterface
      *
      * @return ModuleInterface
      */
-    public function addModule($module)
+    public function addModule($module): ModuleInterface
     {
         if (!($module instanceof ModuleInterface)) {
             $module = new Module($module);
@@ -80,11 +80,9 @@ abstract class Config extends BaseObject implements ConfigInterface
      *
      * @return ModuleInterface|null an instance of a module or null if module not found
      */
-    public function getModule($name)
+    public function getModule(string $name): ?ModuleInterface
     {
-        if (isset($this->modules[$name])) {
-            return $this->modules[$name];
-        }
+        return $this->modules[$name] ?? null;
     }
 
     /**
@@ -92,7 +90,7 @@ abstract class Config extends BaseObject implements ConfigInterface
      *
      * @return ModuleInterface[] a list of registered modules
      */
-    public function getModules(FilterInterface $filter = null)
+    public function getModules(FilterInterface $filter = null): array
     {
         if ($filter !== null) {
             return $filter->filter($this->modules);

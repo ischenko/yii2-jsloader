@@ -21,7 +21,7 @@ interface FilterInterface
      * @param mixed $data
      * @return boolean
      */
-    public function match($data);
+    public function match($data): bool;
 
     /**
      * Performs filtering of given array
@@ -29,5 +29,5 @@ interface FilterInterface
      * @param array $data
      * @return array filtered data
      */
-    public function filter(array $data);
+    public function filter(array $data): array;
 }

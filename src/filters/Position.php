@@ -24,7 +24,7 @@ class Position extends Filter
      * @param mixed $data
      * @return boolean
      */
-    public function match($data)
+    public function match($data): bool
     {
         if ($data instanceof ModuleInterface) {
             $data = $data->getOptions();

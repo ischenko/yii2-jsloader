@@ -23,5 +23,5 @@ interface JsRendererInterface
      * @param JsExpression $expression
      * @return string
      */
-    public function renderJsExpression(JsExpression $expression);
+    public function renderJsExpression(JsExpression $expression): string;
 }

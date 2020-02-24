@@ -32,12 +32,12 @@ abstract class Filter implements FilterInterface
     }
 
     /**
-     * @param mixed $value
+     * Performs checks on single data entity
+     *
+     * @param mixed $data
+     * @return boolean
      */
-    public function setValue($value)
-    {
-        $this->value = $value;
-    }
+    abstract public function match($data): bool;
 
     /**
      * @return mixed
@@ -48,12 +48,12 @@ abstract class Filter implements FilterInterface
     }
 
     /**
-     * Performs checks on single data entity
-     *
-     * @param mixed $data
-     * @return boolean
+     * @param mixed $value
      */
-    abstract public function match($data);
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
 
     /**
      * Performs filtering of given array
@@ -61,7 +61,7 @@ abstract class Filter implements FilterInterface
      * @param array $data
      * @return array filtered data
      */
-    public function filter(array $data)
+    public function filter(array $data): array
     {
         $filteredData = [];
 

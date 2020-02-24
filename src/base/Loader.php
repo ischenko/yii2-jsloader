@@ -31,14 +31,14 @@ use yii\web\View;
 abstract class Loader extends BaseObject implements LoaderInterface
 {
     /**
-     * @var View
-     */
-    private $view;
-
-    /**
      * @var string
      */
     public $runtimePath = '@runtime/jsloader';
+
+    /**
+     * @var View
+     */
+    private $view;
 
     /**
      * @var ClassNameFilter
@@ -68,14 +68,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
     /**
      * @return \ischenko\yii2\jsloader\ConfigInterface an object that implements configuration interface
      */
-    abstract public function getConfig();
-
-    /**
-     * Performs actual rendering of the JS loader
-     *
-     * @param JsExpression[] $jsExpressions a list of js expressions indexed by position
-     */
-    abstract protected function doRender(array $jsExpressions);
+    abstract public function getConfig(): ConfigInterface;
 
     /**
      * @return \yii\web\View the view object associated with the loader
@@ -107,7 +100,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
      * @param ConfigInterface|array $config
      * @return $this
      */
-    public function setConfig($config)
+    public function setConfig($config): LoaderInterface
     {
         $configObject = $this->getConfig();
 
@@ -151,7 +144,6 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         $module->setOptions($options);
 
-        // TODO: think about optimization
         foreach ($bundle->depends as $dependency) {
             if (($dependency = $this->registerAssetBundle($dependency)) !== false) {
                 $module->addDependency($dependency);
@@ -168,7 +160,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
      *
      * @return void
      */
-    public function processAssets()
+    public function processAssets(): void
     {
         $jsExpressions = [];
 
@@ -193,6 +185,13 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         $this->doRender($jsExpressions);
     }
+
+    /**
+     * Performs actual rendering of the JS loader
+     *
+     * @param JsExpression[] $jsExpressions a list of js expressions indexed by position
+     */
+    abstract protected function doRender(array $jsExpressions);
 
     /**
      * @return string a path to runtime folder

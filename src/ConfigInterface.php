@@ -20,7 +20,7 @@ interface ConfigInterface
      *
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 
     /**
      * Adds new module into configuration
@@ -31,19 +31,28 @@ interface ConfigInterface
      *
      * @return ModuleInterface
      */
-    public function addModule($module);
+    public function addModule($module): ModuleInterface;
+
+    /**
+     * Sets aliases for modules
+     *
+     * @param array $aliases a list of aliases, where keys are modules name and value is an alias
+     *
+     * @return $this
+     */
+    public function setAliases(array $aliases): ConfigInterface;
 
     /**
      * @param string $name a name of requested module
      *
      * @return ModuleInterface|null an instance of a module or null if module not found
      */
-    public function getModule($name);
+    public function getModule(string $name): ?ModuleInterface;
 
     /**
      * @param FilterInterface $filter filter to be used to select modules for matching conditions
      *
      * @return ModuleInterface[] a list of registered modules
      */
-    public function getModules(FilterInterface $filter = null);
+    public function getModules(FilterInterface $filter = null): array;
 }

@@ -24,14 +24,12 @@ class NotEmptyFiles extends Filter
      * @param mixed $data
      * @return boolean
      */
-    public function match($data)
+    public function match($data): bool
     {
-        if (!($data instanceof ModuleInterface)) {
-            return false;
+        if ($data instanceof ModuleInterface) {
+            return !empty($data->getFiles());
         }
 
-        $files = $data->getFiles();
-
-        return !empty($files);
+        return false;
     }
 }

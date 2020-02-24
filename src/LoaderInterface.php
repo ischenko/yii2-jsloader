@@ -23,7 +23,7 @@ interface LoaderInterface
     /**
      * @return ConfigInterface an object that implements configuration interface
      */
-    public function getConfig();
+    public function getConfig(): ConfigInterface;
 
     /**
      * Sets new configuration for the loader
@@ -31,14 +31,14 @@ interface LoaderInterface
      * @param ConfigInterface|array $config
      * @return $this
      */
-    public function setConfig($config);
+    public function setConfig($config): LoaderInterface;
 
     /**
      * Performs processing of assets registered in the view
      *
      * @return void
      */
-    public function processAssets();
+    public function processAssets(): void;
 
     /**
      * Registers asset bundle in the loader
