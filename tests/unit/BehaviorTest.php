@@ -26,13 +26,6 @@ class BehaviorTest extends Unit
      */
     protected $behavior;
 
-    protected function _before()
-    {
-        parent::_before();
-
-        $this->behavior = new Behavior();
-    }
-
     /** Tests go below */
 
     public function testInstance()
@@ -130,6 +123,7 @@ class BehaviorTest extends Unit
                 $view->assetBundles = $bundles;
 
                 $loader = $this->tester->mockLoaderInterface([
+                    'getView' => Expected::once($view),
                     'registerAssetBundle' => Expected::exactly(count($bundles))
                 ], $this);
 
@@ -152,5 +146,12 @@ class BehaviorTest extends Unit
 
         $this->behavior->setLoader($loader);
         $this->behavior->processAssets();
+    }
+
+    protected function _before()
+    {
+        parent::_before();
+
+        $this->behavior = new Behavior();
     }
 }
