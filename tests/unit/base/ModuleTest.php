@@ -7,6 +7,7 @@ use Codeception\Specify;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\base\Module;
+use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\tests\UnitTester;
 use stdClass;
 
@@ -26,19 +27,6 @@ class ModuleTest extends Unit
      */
     protected $tester;
 
-    protected function _before()
-    {
-        parent::_before();
-    }
-
-    protected function mockModule($name = null, $params = [], $testCase = false)
-    {
-        $name = $name ?: uniqid();
-        $params = array_merge([], $params);
-
-        return $config = Stub::construct('ischenko\yii2\jsloader\base\Module', [$name], $params, $testCase);
-    }
-
     /** Tests go below */
 
     public function testInstance()
@@ -51,13 +39,13 @@ class ModuleTest extends Unit
 
     public function testConstruct()
     {
-        $module = new Module('test');
+        $module = new Module('test', $this->makeEmpty(ConfigInterface::class));
 
         verify($module->getName())->equals('test');
 
         $this->assertThrows('yii\base\InvalidArgumentException', function () use ($module) {
             $this->specify('it throws an exception if name is not a string or is an empty string', function ($name) {
-                new Module($name);
+                new Module($name, $this->makeEmpty(ConfigInterface::class));
             }, [
                 'examples' => [
                     [null],
@@ -217,5 +205,19 @@ class ModuleTest extends Unit
                 ]
             ]);
         });
+    }
+
+    protected function _before()
+    {
+        parent::_before();
+    }
+
+    protected function mockModule($name = null, $params = [], $testCase = false)
+    {
+        $name = $name ?: uniqid();
+        $params = array_merge([], $params);
+
+        return $config = Stub::construct('ischenko\yii2\jsloader\base\Module',
+            [$name, $this->makeEmpty(ConfigInterface::class)], $params, $testCase);
     }
 }

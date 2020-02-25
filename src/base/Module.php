@@ -7,6 +7,7 @@
 
 namespace ischenko\yii2\jsloader\base;
 
+use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
 use yii\base\BaseObject;
 use yii\base\InvalidArgumentException;
@@ -45,11 +46,17 @@ class Module extends BaseObject implements ModuleInterface
     private $alias;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * Module constructor
      *
      * @param string $name
+     * @param ConfigInterface $config
      */
-    public function __construct($name)
+    public function __construct($name, ConfigInterface $config)
     {
         parent::__construct([]);
 
@@ -58,6 +65,7 @@ class Module extends BaseObject implements ModuleInterface
         }
 
         $this->name = $name;
+        $this->config = $config;
     }
 
     /**
@@ -203,5 +211,13 @@ class Module extends BaseObject implements ModuleInterface
     public function getBaseUrl(): string
     {
         return $this->options['baseUrl'] ?? '';
+    }
+
+    /**
+     * @return ConfigInterface
+     */
+    protected function getConfig(): ConfigInterface
+    {
+        return $this->config;
     }
 }
