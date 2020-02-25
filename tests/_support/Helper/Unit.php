@@ -23,7 +23,7 @@ class Unit extends Module
     public function mockView($params = [], $testCase = false)
     {
         return Stub::construct('yii\web\View', [], array_merge([
-            'assetManager' => Stub::makeEmpty(AssetManager::className(), [
+            'assetManager' => Stub::makeEmpty(AssetManager::class, [
                 'getAssetUrl' => function ($bundle, $asset) {
                     return $asset;
                 }

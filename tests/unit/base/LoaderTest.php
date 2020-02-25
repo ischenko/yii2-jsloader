@@ -40,7 +40,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
         verify('it provides getter for view property', $loader->canGetProperty('view'))->true();
         verify('it provides setter for view property', $loader->canSetProperty('view'))->false();
-        verify('getter returns an instance of view object', $loader->getView())->isInstanceOf(View::className());
+        verify('getter returns an instance of view object', $loader->getView())->isInstanceOf(View::class);
     }
 
     public function testConfigSetter()
@@ -95,7 +95,7 @@ class LoaderTest extends \Codeception\Test\Unit
                 ], $this)
             ]);
 
-            $loader->getView()->assetBundles['test'] = $bundle = Stub::makeEmpty(AssetBundle::className());
+            $loader->getView()->assetBundles['test'] = $bundle = Stub::makeEmpty(AssetBundle::class);
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
         });
@@ -117,7 +117,7 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
 
             $loader->getView()->assetBundles = [
-                'test' => Stub::makeEmpty(AssetBundle::className(), [
+                'test' => Stub::makeEmpty(AssetBundle::class, [
                     'depends' => [
                         'dep1',
                         'dep2',
@@ -125,15 +125,15 @@ class LoaderTest extends \Codeception\Test\Unit
                         'depN'
                     ]
                 ]),
-                'dep2' => Stub::makeEmpty(AssetBundle::className(), ['depends' => ['dep1']]),
-                'depN' => Stub::makeEmpty(AssetBundle::className(), ['depends' => ['dep2']])
+                'dep2' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep1']]),
+                'depN' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep2']])
             ];
 
             verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
         });
 
         $this->specify('it loads files from asset bundle', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+            $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'js' => [
                     'file1.js',
                     'file2.js',
@@ -159,7 +159,7 @@ class LoaderTest extends \Codeception\Test\Unit
         });
 
         $this->specify('it clears js files in an asset bundle after loading', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+            $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'js' => [
                     'file1.js',
                     'file2.js',
@@ -182,7 +182,7 @@ class LoaderTest extends \Codeception\Test\Unit
         });
 
         $this->specify('it loads settings from asset bundle', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+            $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'js' => [
                 ],
                 'jsOptions' => [
@@ -210,7 +210,7 @@ class LoaderTest extends \Codeception\Test\Unit
         });
 
         $this->specify('it adds base url from asset bundle to a module settings', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::className(), [
+            $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'baseUrl' => '/base/url'
             ]);
 
@@ -241,12 +241,12 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
 
             $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                'test1' => Stub::makeEmpty(AssetBundle::class, [
                     'jsOptions' => [
                         'position' => View::POS_END
                     ]
                 ]),
-                'test2' => Stub::makeEmpty(AssetBundle::className(), [
+                'test2' => Stub::makeEmpty(AssetBundle::class, [
                     'jsOptions' => [
                         'position' => View::POS_HEAD
                     ]
@@ -259,7 +259,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
         $this->specify('each file can have its own settings',
             function ($js, $expectedFile, $expectedOptions) {
-                $bundle = Stub::makeEmpty(AssetBundle::className(), [
+                $bundle = Stub::makeEmpty(AssetBundle::class, [
                     'js' => [
                         $js
                     ]
@@ -305,13 +305,13 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
 
             $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                'test1' => Stub::makeEmpty(AssetBundle::class, [
                     'js' => [
                         ['file1', 'position' => View::POS_HEAD],
                         'file2'
                     ]
                 ]),
-                'test2' => Stub::makeEmpty(AssetBundle::className(), [
+                'test2' => Stub::makeEmpty(AssetBundle::class, [
                     'js' => [
                         ['file1', 'position' => View::POS_READY],
                         'file2'
@@ -339,7 +339,7 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
 
             $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::className(), [
+                'test1' => Stub::makeEmpty(AssetBundle::class, [
                     'js' => [
                         ['file1', 'position' => View::POS_HEAD],
                         'file2'
@@ -362,8 +362,8 @@ class LoaderTest extends \Codeception\Test\Unit
             ]);
 
             $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::className()),
-                'test2' => Stub::makeEmpty(AssetBundle::className()),
+                'test1' => Stub::makeEmpty(AssetBundle::class),
+                'test2' => Stub::makeEmpty(AssetBundle::class),
             ];
 
             $loader->ignoreBundles = ['test2'];
