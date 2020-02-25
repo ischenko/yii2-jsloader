@@ -51,6 +51,11 @@ abstract class Loader extends BaseObject implements LoaderInterface
     private $ignoredPositions;
 
     /**
+     * @var array
+     */
+    private $seenAssetBundles = [];
+
+    /**
      * Loader constructor.
      *
      * @param View $view
@@ -112,6 +117,8 @@ abstract class Loader extends BaseObject implements LoaderInterface
             $configObject->$key = $value;
         }
 
+        $this->seenAssetBundles = [];
+
         return $this;
     }
 
@@ -130,11 +137,14 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         $config = $this->getConfig();
 
-        if (($module = $config->getModule($name)) !== null) {
+        if (!($module = $config->getModule($name))) {
+            $module = $config->addModule($name);
+        } elseif (isset($this->seenAssetBundles[$name])) {
             return $module;
         }
 
-        $module = $config->addModule($name);
+        $this->seenAssetBundles[$name] = true;
+
         $options = $bundle->jsOptions;
 
         if (!isset($options['position'])) {
