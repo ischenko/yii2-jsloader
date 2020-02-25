@@ -69,7 +69,7 @@ abstract class Config extends BaseObject implements ConfigInterface
     public function addModule($module): ModuleInterface
     {
         if (!($module instanceof ModuleInterface)) {
-            $module = new Module($module, $this);
+            $module = new Module($module);
         }
 
         return ($this->modules[$module->getName()] = $module);
