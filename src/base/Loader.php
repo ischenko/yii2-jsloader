@@ -130,10 +130,11 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         $config = $this->getConfig();
 
-        if (!($module = $config->getModule($name))) {
-            $module = $config->addModule($name);
+        if (($module = $config->getModule($name)) !== null) {
+            return $module;
         }
 
+        $module = $config->addModule($name);
         $options = $bundle->jsOptions;
 
         if (!isset($options['position'])) {

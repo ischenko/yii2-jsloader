@@ -101,11 +101,18 @@ class LoaderTest extends \Codeception\Test\Unit
         });
 
         $this->specify('it will register dependencies recursively', function () {
+            $modules = [];
+
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => $this->tester->mockModuleInterface([
-                        'addDependency' => Expected::exactly(3, $this->makeEmpty(ModuleInterface::class))
-                    ], $this)
+                    'addModule' => Expected::exactly(3, function ($name) use (&$modules) {
+                        return $modules[$name] = $this->tester->mockModuleInterface([
+                            'addDependency' => $this->makeEmpty(ModuleInterface::class)
+                        ], $this);
+                    }),
+                    'getModule' => Expected::exactly(9, function ($name) use (&$modules) {
+                        return $modules[$name] ?? null;
+                    })
                 ])
             ]);
 
@@ -137,7 +144,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => $this->tester->mockModuleInterface([
+                    'addModule' => $this->tester->mockModuleInterface([
                         'addFile' => Expected::exactly(4, function ($file) use ($bundle) {
                             verify($bundle->js)->contains($file);
                             return $this->makeEmpty(ModuleInterface::class);
@@ -163,7 +170,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader = $this->tester->mockBaseLoader([
                 'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => $this->tester->mockModuleInterface()
+                    'addModule' => $this->tester->mockModuleInterface()
                 ])
             ]);
 
