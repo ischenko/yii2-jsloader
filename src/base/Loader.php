@@ -145,13 +145,10 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         $this->seenAssetBundles[$name] = true;
 
-        $options = $bundle->jsOptions;
+        $options = ['baseUrl' => $bundle->baseUrl];
 
-        if (!isset($options['position'])) {
-            $options['position'] = View::POS_END;
-        }
-
-        $options['baseUrl'] = $bundle->baseUrl;
+        $options += $bundle->jsOptions ?: [];
+        $options += ['position' => View::POS_END];
 
         $module->setOptions($options);
 
