@@ -8,6 +8,7 @@
 namespace ischenko\yii2\jsloader\base;
 
 use ischenko\yii2\jsloader\ModuleInterface;
+use ischenko\yii2\jsloader\traits\DependencyAware;
 use yii\base\BaseObject;
 use yii\base\InvalidArgumentException;
 
@@ -19,6 +20,8 @@ use yii\base\InvalidArgumentException;
  */
 class Module extends BaseObject implements ModuleInterface
 {
+    use DependencyAware;
+
     /**
      * @var string
      */
@@ -33,11 +36,6 @@ class Module extends BaseObject implements ModuleInterface
      * @var array
      */
     private $files = [];
-
-    /**
-     * @var array
-     */
-    private $dependencies = [];
 
     /**
      * @var string alias name
@@ -132,48 +130,6 @@ class Module extends BaseObject implements ModuleInterface
     public function clearFiles(): ModuleInterface
     {
         $this->files = [];
-
-        return $this;
-    }
-
-    /**
-     * Adds dependency to a module
-     *
-     * @param ModuleInterface $depends an instance of another module which will is being added as dependency
-     *
-     * @return $this
-     */
-    public function addDependency(ModuleInterface $depends): ModuleInterface
-    {
-        if ($depends->getFiles() === []) {
-            foreach ($depends->getDependencies() as $dependency) {
-                $this->addDependency($dependency);
-            }
-
-            return $this;
-        }
-
-        $this->dependencies[$depends->getName()] = $depends;
-
-        return $this;
-    }
-
-    /**
-     * @return ModuleInterface[] a list of dependencies of a module
-     */
-    public function getDependencies(): array
-    {
-        return $this->dependencies;
-    }
-
-    /**
-     * Clears all dependencies from a module
-     *
-     * @return $this
-     */
-    public function clearDependencies(): ModuleInterface
-    {
-        $this->dependencies = [];
 
         return $this;
     }

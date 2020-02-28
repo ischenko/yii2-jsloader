@@ -7,6 +7,7 @@ use Codeception\Specify;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use ischenko\yii2\jsloader\base\Module;
+use ischenko\yii2\jsloader\DependencyAwareInterface;
 use ischenko\yii2\jsloader\tests\UnitTester;
 use stdClass;
 
@@ -26,19 +27,6 @@ class ModuleTest extends Unit
      */
     protected $tester;
 
-    protected function _before()
-    {
-        parent::_before();
-    }
-
-    protected function mockModule($name = null, $params = [], $testCase = false)
-    {
-        $name = $name ?: uniqid();
-        $params = array_merge([], $params);
-
-        return $config = Stub::construct('ischenko\yii2\jsloader\base\Module', [$name], $params, $testCase);
-    }
-
     /** Tests go below */
 
     public function testInstance()
@@ -46,6 +34,7 @@ class ModuleTest extends Unit
         $module = $this->mockModule();
 
         verify($module)->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+        verify($module)->isInstanceOf(DependencyAwareInterface::class);
         verify($module)->isInstanceOf('yii\base\BaseObject');
     }
 
@@ -217,5 +206,18 @@ class ModuleTest extends Unit
                 ]
             ]);
         });
+    }
+
+    protected function _before()
+    {
+        parent::_before();
+    }
+
+    protected function mockModule($name = null, $params = [], $testCase = false)
+    {
+        $name = $name ?: uniqid();
+        $params = array_merge([], $params);
+
+        return $config = Stub::construct('ischenko\yii2\jsloader\base\Module', [$name], $params, $testCase);
     }
 }

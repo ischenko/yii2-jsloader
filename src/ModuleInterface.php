@@ -13,7 +13,7 @@ namespace ischenko\yii2\jsloader;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-interface ModuleInterface
+interface ModuleInterface extends DependencyAwareInterface
 {
     /**
      * @return string a name associated with a module
@@ -60,27 +60,6 @@ interface ModuleInterface
      * @return $this
      */
     public function clearFiles(): ModuleInterface;
-
-    /**
-     * Adds dependency to a module
-     *
-     * @param ModuleInterface $depends an instance of another module which will is being added as dependency
-     *
-     * @return $this
-     */
-    public function addDependency(ModuleInterface $depends): ModuleInterface;
-
-    /**
-     * @return ModuleInterface[] a list of dependencies of a module
-     */
-    public function getDependencies(): array;
-
-    /**
-     * Clears all dependencies from a module
-     *
-     * @return $this
-     */
-    public function clearDependencies(): ModuleInterface;
 
     /**
      * @param array $options options for a module

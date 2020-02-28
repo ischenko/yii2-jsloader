@@ -7,6 +7,7 @@ use Codeception\Specify;
 use Codeception\Stub\Expected;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
+use ischenko\yii2\jsloader\DependencyAwareInterface;
 use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\tests\UnitTester;
 
@@ -33,12 +34,17 @@ class JsExpressionTest extends Unit
     public function testConstruct()
     {
         $expression = new JsExpression();
+
+        verify($expression)->isInstanceOf(DependencyAwareInterface::class);
+
         verify($expression->getExpression())->null();
         verify($expression->getDependencies())->equals([]);
 
         $expression = new JsExpression('test', [$m = $this->tester->mockModuleInterface()]);
+
         verify($expression->getExpression())->equals('test');
         verify($expression->getDependencies())->equals([$m]);
+
         verify((new JsExpression($expression))->getExpression())->same($expression);
     }
 

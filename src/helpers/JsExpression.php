@@ -7,8 +7,10 @@
 
 namespace ischenko\yii2\jsloader\helpers;
 
+use ischenko\yii2\jsloader\DependencyAwareInterface;
 use ischenko\yii2\jsloader\JsRendererInterface;
 use ischenko\yii2\jsloader\ModuleInterface;
+use ischenko\yii2\jsloader\traits\DependencyAware;
 use yii\base\InvalidArgumentException;
 
 /**
@@ -17,8 +19,10 @@ use yii\base\InvalidArgumentException;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-class JsExpression
+class JsExpression implements DependencyAwareInterface
 {
+    use DependencyAware;
+
     /**
      * @var string|JsExpression
      */
@@ -55,6 +59,14 @@ class JsExpression
     }
 
     /**
+     * @return string|JsExpression
+     */
+    public function getExpression()
+    {
+        return $this->expression;
+    }
+
+    /**
      * @param string|JsExpression $expression
      *
      * @return $this
@@ -70,41 +82,5 @@ class JsExpression
         $this->expression = $expression;
 
         return $this;
-    }
-
-    /**
-     * @param ModuleInterface[] $dependencies
-     *
-     * @return $this
-     */
-    public function setDependencies(array $dependencies)
-    {
-        $this->dependencies = [];
-
-        foreach ($dependencies as $dependency) {
-            if (!($dependency instanceof ModuleInterface)) {
-                throw new InvalidArgumentException('Dependency must implement ModuleInterface');
-            }
-
-            $this->dependencies[] = $dependency;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return ModuleInterface[]
-     */
-    public function getDependencies()
-    {
-        return $this->dependencies;
-    }
-
-    /**
-     * @return string|JsExpression
-     */
-    public function getExpression()
-    {
-        return $this->expression;
     }
 }
