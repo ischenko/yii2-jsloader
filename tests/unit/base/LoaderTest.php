@@ -4,6 +4,7 @@ namespace ischenko\yii2\jsloader\tests\unit\base;
 
 use Codeception\Stub\Expected;
 use Codeception\Util\Stub;
+use ischenko\yii2\jsloader\base\Loader;
 use ischenko\yii2\jsloader\ModuleInterface;
 use yii\helpers\Html;
 use yii\web\AssetBundle;
@@ -64,75 +65,82 @@ class LoaderTest extends \Codeception\Test\Unit
      */
     public function testRegisterAssetBundle()
     {
-        $this->specify('it does not process bundles that are not registered in a view', function () {
-            verify($this->tester->mockBaseLoader()->registerAssetBundle('test'))->false();
-        });
+        $registerAssetBundle = new \ReflectionMethod(Loader::class, 'registerAssetBundle');
+        $registerAssetBundle->setAccessible(true);
 
-        $this->specify('it does not process bundle if it is not an instance of AssetBundle object', function ($value) {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => Expected::never()
-            ], $this);
+        $this->specify('it does not process bundles that are not registered in a view',
+            function () use ($registerAssetBundle) {
+                verify($registerAssetBundle->invoke($this->tester->mockBaseLoader(), 'test'))->false();
+            });
 
-            $loader->getView()->assetBundles['test'] = $value;
+        $this->specify('it does not process bundle if it is not an instance of AssetBundle object',
+            function ($value) use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => Expected::never()
+                ], $this);
 
-            verify($loader->registerAssetBundle('test'))->false();
-        }, [
-            'examples' => [
-                ['string'],
-                [['array']],
-                [(new \stdClass())],
-                [123]
-            ]
-        ]);
+                $loader->getView()->assetBundles['test'] = $value;
 
-        $this->specify('it will create a module for asset bundle and return it', function () {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'getModule' => Expected::once(function ($name) {
-                        verify($name)->equals('test');
-                        return $this->tester->mockModuleInterface();
-                    })
-                ], $this)
+                verify($registerAssetBundle->invoke($loader, 'test'))->false();
+            }, [
+                'examples' => [
+                    ['string'],
+                    [['array']],
+                    [(new \stdClass())],
+                    [123]
+                ]
             ]);
 
-            $loader->getView()->assetBundles['test'] = $bundle = Stub::makeEmpty(AssetBundle::class);
+        $this->specify('it will create a module for asset bundle and return it',
+            function () use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'getModule' => Expected::once(function ($name) {
+                            verify($name)->equals('test');
+                            return $this->tester->mockModuleInterface();
+                        })
+                    ], $this)
+                ]);
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-        });
+                $loader->getView()->assetBundles['test'] = $bundle = Stub::makeEmpty(AssetBundle::class);
 
-        $this->specify('it will register dependencies recursively', function () {
-            $modules = [];
+                verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
+            });
 
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => Expected::exactly(3, function ($name) use (&$modules) {
-                        return $modules[$name] = $this->tester->mockModuleInterface([
-                            'addDependency' => $this->makeEmpty(ModuleInterface::class)
-                        ], $this);
-                    }),
-                    'getModule' => Expected::exactly(9, function ($name) use (&$modules) {
-                        return $modules[$name] ?? null;
-                    })
-                ])
-            ]);
+        $this->specify('it will register dependencies recursively',
+            function () use ($registerAssetBundle) {
+                $modules = [];
 
-            $loader->getView()->assetBundles = [
-                'test' => Stub::makeEmpty(AssetBundle::class, [
-                    'depends' => [
-                        'dep1',
-                        'dep2',
-                        'dep3',
-                        'depN'
-                    ]
-                ]),
-                'dep2' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep1']]),
-                'depN' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep2']])
-            ];
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => Expected::exactly(3, function ($name) use (&$modules) {
+                            return $modules[$name] = $this->tester->mockModuleInterface([
+                                'addDependency' => $this->makeEmpty(ModuleInterface::class)
+                            ], $this);
+                        }),
+                        'getModule' => Expected::exactly(9, function ($name) use (&$modules) {
+                            return $modules[$name] ?? null;
+                        })
+                    ])
+                ]);
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-        });
+                $loader->getView()->assetBundles = [
+                    'test' => Stub::makeEmpty(AssetBundle::class, [
+                        'depends' => [
+                            'dep1',
+                            'dep2',
+                            'dep3',
+                            'depN'
+                        ]
+                    ]),
+                    'dep2' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep1']]),
+                    'depN' => Stub::makeEmpty(AssetBundle::class, ['depends' => ['dep2']])
+                ];
 
-        $this->specify('it loads files from asset bundle', function () {
+                verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
+            });
+
+        $this->specify('it loads files from asset bundle', function () use ($registerAssetBundle) {
             $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'js' => [
                     'file1.js',
@@ -155,33 +163,34 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader->getView()->assetBundles['test'] = $bundle;
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
         });
 
-        $this->specify('it clears js files in an asset bundle after loading', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::class, [
-                'js' => [
-                    'file1.js',
-                    'file2.js',
-                    'file3.js',
-                    'fileN.js'
-                ]
-            ]);
+        $this->specify('it clears js files in an asset bundle after loading',
+            function () use ($registerAssetBundle) {
+                $bundle = Stub::makeEmpty(AssetBundle::class, [
+                    'js' => [
+                        'file1.js',
+                        'file2.js',
+                        'file3.js',
+                        'fileN.js'
+                    ]
+                ]);
 
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => $this->tester->mockModuleInterface()
-                ])
-            ]);
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => $this->tester->mockModuleInterface()
+                    ])
+                ]);
 
-            $loader->getView()->assetBundles['test'] = $bundle;
+                $loader->getView()->assetBundles['test'] = $bundle;
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+                verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
 
-            verify($bundle->js)->equals([]);
-        });
+                verify($bundle->js)->equals([]);
+            });
 
-        $this->specify('it loads settings from asset bundle', function () {
+        $this->specify('it loads settings from asset bundle', function () use ($registerAssetBundle) {
             $bundle = Stub::makeEmpty(AssetBundle::class, [
                 'js' => [
                 ],
@@ -206,59 +215,61 @@ class LoaderTest extends \Codeception\Test\Unit
 
             $loader->getView()->assetBundles['test'] = $bundle;
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+            verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
         });
 
-        $this->specify('it adds base url from asset bundle to a module settings', function () {
-            $bundle = Stub::makeEmpty(AssetBundle::class, [
-                'baseUrl' => '/base/url'
-            ]);
+        $this->specify('it adds base url from asset bundle to a module settings',
+            function () use ($registerAssetBundle) {
+                $bundle = Stub::makeEmpty(AssetBundle::class, [
+                    'baseUrl' => '/base/url'
+                ]);
 
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => $this->tester->mockModuleInterface([
-                        'setOptions' => Expected::once(function ($options) use ($bundle) {
-                            verify($options)->equals(['position' => View::POS_END, 'baseUrl' => '/base/url']);
-                            return $this->makeEmpty(ModuleInterface::class);
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => $this->tester->mockModuleInterface([
+                            'setOptions' => Expected::once(function ($options) use ($bundle) {
+                                verify($options)->equals(['position' => View::POS_END, 'baseUrl' => '/base/url']);
+                                return $this->makeEmpty(ModuleInterface::class);
+                            })
+                        ], $this)
+                    ])
+                ]);
+
+                $loader->getView()->assetBundles['test'] = $bundle;
+
+                verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
+            });
+
+        $this->specify('it ignores asset bundles which are positioned in the head section by default',
+            function () use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => Expected::once(function ($name) {
+                            verify($name)->equals('test1');
+                            return $this->tester->mockModuleInterface();
                         })
                     ], $this)
-                ])
-            ]);
+                ]);
 
-            $loader->getView()->assetBundles['test'] = $bundle;
+                $loader->getView()->assetBundles = [
+                    'test1' => Stub::makeEmpty(AssetBundle::class, [
+                        'jsOptions' => [
+                            'position' => View::POS_END
+                        ]
+                    ]),
+                    'test2' => Stub::makeEmpty(AssetBundle::class, [
+                        'jsOptions' => [
+                            'position' => View::POS_HEAD
+                        ]
+                    ]),
+                ];
 
-            verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-        });
-
-        $this->specify('it ignores asset bundles which are positioned in the head section by default', function () {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => Expected::once(function ($name) {
-                        verify($name)->equals('test1');
-                        return $this->tester->mockModuleInterface();
-                    })
-                ], $this)
-            ]);
-
-            $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::class, [
-                    'jsOptions' => [
-                        'position' => View::POS_END
-                    ]
-                ]),
-                'test2' => Stub::makeEmpty(AssetBundle::class, [
-                    'jsOptions' => [
-                        'position' => View::POS_HEAD
-                    ]
-                ]),
-            ];
-
-            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-            verify($loader->registerAssetBundle('test2'))->false();
-        });
+                verify($registerAssetBundle->invoke($loader, 'test1'))->isInstanceOf(ModuleInterface::class);
+                verify($registerAssetBundle->invoke($loader, 'test2'))->false();
+            });
 
         $this->specify('each file can have its own settings',
-            function ($js, $expectedFile, $expectedOptions) {
+            function ($js, $expectedFile, $expectedOptions) use ($registerAssetBundle) {
                 $bundle = Stub::makeEmpty(AssetBundle::class, [
                     'js' => [
                         $js
@@ -284,7 +295,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
                 $loader->getView()->assetBundles['test'] = $bundle;
 
-                verify($loader->registerAssetBundle('test'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
+                verify($registerAssetBundle->invoke($loader, 'test'))->isInstanceOf(ModuleInterface::class);
             },
             [
                 'examples' => [
@@ -295,87 +306,100 @@ class LoaderTest extends \Codeception\Test\Unit
                 ]
             ]);
 
-        $this->specify('it allows to ignore files and scripts by position', function () {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => function ($name) {
-                        return $this->tester->mockModuleInterface();
-                    }
-                ])
-            ]);
+        $this->specify('it allows to ignore files and scripts by position',
+            function () use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => function ($name) {
+                            return $this->tester->mockModuleInterface();
+                        }
+                    ])
+                ]);
 
-            $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::class, [
-                    'js' => [
-                        ['file1', 'position' => View::POS_HEAD],
-                        'file2'
+                $loader->getView()->assetBundles = [
+                    'test1' => Stub::makeEmpty(AssetBundle::class, [
+                        'js' => [
+                            ['file1', 'position' => View::POS_HEAD],
+                            'file2'
+                        ]
+                    ]),
+                    'test2' => Stub::makeEmpty(AssetBundle::class, [
+                        'js' => [
+                            ['file1', 'position' => View::POS_READY],
+                            'file2'
+                        ],
+                        'jsOptions' => [
+                            'position' => View::POS_LOAD
+                        ]
+                    ]),
+                ];
+
+                $loader->setIgnorePositions([View::POS_HEAD, View::POS_LOAD]);
+
+                verify($registerAssetBundle->invoke($loader, 'test1'))->isInstanceOf(ModuleInterface::class);
+                verify($loader->getView()->assetBundles['test1']->js)->equals([
+                    [
+                        'file1',
+                        'position' => View::POS_HEAD
                     ]
-                ]),
-                'test2' => Stub::makeEmpty(AssetBundle::class, [
-                    'js' => [
-                        ['file1', 'position' => View::POS_READY],
-                        'file2'
-                    ],
-                    'jsOptions' => [
-                        'position' => View::POS_LOAD
+                ]);
+                verify($registerAssetBundle->invoke($loader, 'test2'))->false();
+            });
+
+        $this->specify('it ignores files which are positioned in the head section by default',
+            function () use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => Expected::once(function ($name) {
+                            return $this->tester->mockModuleInterface();
+                        })
+                    ], $this)
+                ]);
+
+                $loader->getView()->assetBundles = [
+                    'test1' => Stub::makeEmpty(AssetBundle::class, [
+                        'js' => [
+                            ['file1', 'position' => View::POS_HEAD],
+                            'file2'
+                        ]
+                    ]),
+                ];
+
+                verify($registerAssetBundle->invoke($loader, 'test1'))->isInstanceOf(ModuleInterface::class);
+                verify($loader->getView()->assetBundles['test1']->js)->equals([
+                    [
+                        'file1',
+                        'position' => View::POS_HEAD
                     ]
-                ]),
-            ];
+                ]);
+            });
 
-            $loader->setIgnorePositions([View::POS_HEAD, View::POS_LOAD]);
+        $this->specify('it ignores asset bundles listed in the ignoreBundles property',
+            function () use ($registerAssetBundle) {
+                $loader = $this->tester->mockBaseLoader([
+                    'getConfig' => $this->tester->mockConfigInterface([
+                        'addModule' => Expected::once(function ($name) {
+                            verify($name)->equals('test1');
+                            return $this->tester->mockModuleInterface();
+                        })
+                    ], $this)
+                ]);
 
-            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-            verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
-            verify($loader->registerAssetBundle('test2'))->false();
-        });
+                $loader->getView()->assetBundles = [
+                    'test1' => Stub::makeEmpty(AssetBundle::class),
+                    'test2' => Stub::makeEmpty(AssetBundle::class),
+                ];
 
-        $this->specify('it ignores files which are positioned in the head section by default', function () {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => Expected::once(function ($name) {
-                        return $this->tester->mockModuleInterface();
-                    })
-                ], $this)
-            ]);
+                $loader->ignoreBundles = ['test2'];
 
-            $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::class, [
-                    'js' => [
-                        ['file1', 'position' => View::POS_HEAD],
-                        'file2'
-                    ]
-                ]),
-            ];
+                verify($registerAssetBundle->invoke($loader, 'test1'))->isInstanceOf(ModuleInterface::class);
+                verify($registerAssetBundle->invoke($loader, 'test2'))->false();
 
-            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-            verify($loader->getView()->assetBundles['test1']->js)->equals([['file1', 'position' => View::POS_HEAD]]);
-        });
+                $loader->ignoreBundles = ['test1', 'test2'];
 
-        $this->specify('it ignores asset bundles listed in the ignoreBundles property', function () {
-            $loader = $this->tester->mockBaseLoader([
-                'getConfig' => $this->tester->mockConfigInterface([
-                    'addModule' => Expected::once(function ($name) {
-                        verify($name)->equals('test1');
-                        return $this->tester->mockModuleInterface();
-                    })
-                ], $this)
-            ]);
-
-            $loader->getView()->assetBundles = [
-                'test1' => Stub::makeEmpty(AssetBundle::class),
-                'test2' => Stub::makeEmpty(AssetBundle::class),
-            ];
-
-            $loader->ignoreBundles = ['test2'];
-
-            verify($loader->registerAssetBundle('test1'))->isInstanceOf('ischenko\yii2\jsloader\ModuleInterface');
-            verify($loader->registerAssetBundle('test2'))->false();
-
-            $loader->ignoreBundles = ['test1', 'test2'];
-
-            verify($loader->registerAssetBundle('test1'))->false();
-            verify($loader->registerAssetBundle('test2'))->false();
-        });
+                verify($registerAssetBundle->invoke($loader, 'test1'))->false();
+                verify($registerAssetBundle->invoke($loader, 'test2'))->false();
+            });
     }
 
     /**
@@ -412,7 +436,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
                 $loader = $this->tester->mockBaseLoader([
                     'view' => $this->view,
-                    'doRender' => Expected::once(function ($codeBlocks) {
+                    'setJsExpressions' => Expected::once(function ($codeBlocks) {
                         verify($codeBlocks)->array();
                         verify($codeBlocks)->hasKey(View::POS_END);
                         verify($codeBlocks[View::POS_END])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
@@ -483,7 +507,7 @@ class LoaderTest extends \Codeception\Test\Unit
                         }),
                         'getModules' => []
                     ], $this),
-                    'doRender' => Expected::once(function ($codeBlocks) {
+                    'setJsExpressions' => Expected::once(function ($codeBlocks) {
                         verify($codeBlocks)->array();
                         verify($codeBlocks)->hasKey(View::POS_BEGIN);
                         verify($codeBlocks[View::POS_BEGIN])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
@@ -538,7 +562,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
                 'getConfig' => $config,
-                'doRender' => Expected::once(function ($codeBlocks) {
+                'setJsExpressions' => Expected::once(function ($codeBlocks) {
                     verify($codeBlocks)->array();
                     verify($codeBlocks)->hasntKey(View::POS_HEAD);
                     verify($codeBlocks)->hasKey(View::POS_LOAD);

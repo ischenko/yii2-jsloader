@@ -54,12 +54,7 @@ class Behavior extends \yii\base\Behavior
      */
     public function processBundles()
     {
-        $loader = $this->getLoader();
-        $view = $loader->getView();
-
-        foreach (array_keys($view->assetBundles) as $name) {
-            $loader->registerAssetBundle($name);
-        }
+        $this->getLoader()->processBundles();
     }
 
     /**

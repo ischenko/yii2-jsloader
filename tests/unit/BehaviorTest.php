@@ -123,7 +123,7 @@ class BehaviorTest extends Unit
                 $view->assetBundles = $bundles;
 
                 $loader = $this->tester->mockLoaderInterface([
-                    'getView' => Expected::once($view),
+                    'getView' => Expected::never(),
                     'registerAssetBundle' => Expected::exactly(count($bundles))
                 ], $this);
 

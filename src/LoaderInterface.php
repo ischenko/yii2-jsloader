@@ -41,11 +41,8 @@ interface LoaderInterface
     public function processAssets(): void;
 
     /**
-     * Registers asset bundle in the loader
-     *
-     * @param string $name
-     *
-     * @return ModuleInterface|false an instance of registered module or false if asset bundle was not registered
+     * Start processing asset bundles with further publish
+     * @since 1.3
      */
-    public function registerAssetBundle(string $name);
+    public function processBundles(): void;
 }

@@ -123,13 +123,66 @@ abstract class Loader extends BaseObject implements LoaderInterface
     }
 
     /**
+     * Performs processing of assets registered in the view
+     *
+     * @return void
+     */
+    public function processAssets(): void
+    {
+        $expressions = [];
+
+        foreach ([
+                     View::POS_HEAD,
+                     View::POS_BEGIN,
+                     View::POS_END,
+                     View::POS_LOAD,
+                     View::POS_READY
+                 ] as $position
+        ) {
+            if ($this->ignoredPositions->match($position)) {
+                continue;
+            }
+
+            if (($jsExpression = $this->createJsExpression($position)) === null) {
+                continue;
+            }
+
+            $expressions[$position] = $jsExpression;
+        }
+
+        $this->setJsExpressions($expressions);
+    }
+
+    /**
+     * Start processing asset bundles with further publish
+     * @since 1.3
+     */
+    public function processBundles(): void
+    {
+        $view = $this->getView();
+
+        foreach (array_keys($view->assetBundles) as $name) {
+            $this->registerAssetBundle($name);
+        }
+    }
+
+    /**
+     * Adds a new JS expressions to loader
+     *
+     * @param array $expressions
+     *
+     * @return void
+     */
+    abstract protected function setJsExpressions(array $expressions): void;
+
+    /**
      * Registers asset bundle in the loader
      *
      * @param string $name
      *
      * @return ModuleInterface|false an instance of registered module or false if asset bundle was not registered
      */
-    public function registerAssetBundle(string $name)
+    protected function registerAssetBundle(string $name)
     {
         if (($bundle = $this->getAssetBundleFromView($name)) === false) {
             return $bundle;
@@ -162,44 +215,6 @@ abstract class Loader extends BaseObject implements LoaderInterface
 
         return $module;
     }
-
-    /**
-     * Performs processing of assets registered in the view
-     *
-     * @return void
-     */
-    public function processAssets(): void
-    {
-        $jsExpressions = [];
-
-        foreach ([
-                     View::POS_HEAD,
-                     View::POS_BEGIN,
-                     View::POS_END,
-                     View::POS_LOAD,
-                     View::POS_READY
-                 ] as $position
-        ) {
-            if ($this->ignoredPositions->match($position)) {
-                continue;
-            }
-
-            if (($jsExpression = $this->createJsExpression($position)) === null) {
-                continue;
-            }
-
-            $jsExpressions[$position] = $jsExpression;
-        }
-
-        $this->doRender($jsExpressions);
-    }
-
-    /**
-     * Performs actual rendering of the JS loader
-     *
-     * @param JsExpression[] $jsExpressions a list of js expressions indexed by position
-     */
-    abstract protected function doRender(array $jsExpressions);
 
     /**
      * @return string a path to runtime folder
