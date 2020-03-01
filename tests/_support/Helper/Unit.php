@@ -58,7 +58,7 @@ class Unit extends Module
     public function mockBaseLoader($params = [], $testCase = false)
     {
         $params = array_merge([
-            'setJsExpressions' => null,
+            'renderJs' => null,
             'getConfig' => Stub::makeEmpty('ischenko\yii2\jsloader\ConfigInterface', ['getModules' => []])
         ], $params);
 

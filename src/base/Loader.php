@@ -150,7 +150,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
             $expressions[$position] = $jsExpression;
         }
 
-        $this->setJsExpressions($expressions);
+        $this->renderJs($expressions);
     }
 
     /**
@@ -173,7 +173,7 @@ abstract class Loader extends BaseObject implements LoaderInterface
      *
      * @return void
      */
-    abstract protected function setJsExpressions(array $expressions): void;
+    abstract protected function renderJs(array $expressions): void;
 
     /**
      * Registers asset bundle in the loader

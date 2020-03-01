@@ -436,7 +436,7 @@ class LoaderTest extends \Codeception\Test\Unit
 
                 $loader = $this->tester->mockBaseLoader([
                     'view' => $this->view,
-                    'setJsExpressions' => Expected::once(function ($codeBlocks) {
+                    'renderJs' => Expected::once(function ($codeBlocks) {
                         verify($codeBlocks)->array();
                         verify($codeBlocks)->hasKey(View::POS_END);
                         verify($codeBlocks[View::POS_END])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
@@ -507,7 +507,7 @@ class LoaderTest extends \Codeception\Test\Unit
                         }),
                         'getModules' => []
                     ], $this),
-                    'setJsExpressions' => Expected::once(function ($codeBlocks) {
+                    'renderJs' => Expected::once(function ($codeBlocks) {
                         verify($codeBlocks)->array();
                         verify($codeBlocks)->hasKey(View::POS_BEGIN);
                         verify($codeBlocks[View::POS_BEGIN])->isInstanceOf('ischenko\yii2\jsloader\helpers\JsExpression');
@@ -562,7 +562,7 @@ class LoaderTest extends \Codeception\Test\Unit
             $loader = $this->tester->mockBaseLoader([
                 'view' => $this->view,
                 'getConfig' => $config,
-                'setJsExpressions' => Expected::once(function ($codeBlocks) {
+                'renderJs' => Expected::once(function ($codeBlocks) {
                     verify($codeBlocks)->array();
                     verify($codeBlocks)->hasntKey(View::POS_HEAD);
                     verify($codeBlocks)->hasKey(View::POS_LOAD);
