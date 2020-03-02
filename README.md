@@ -13,6 +13,7 @@ Along with behavior it provides a set of interfaces and base classes for impleme
 
 Currently available implementations of js loaders are:
  - [yii2-jsloader-requirejs](https://github.com/ischenko/yii2-jsloader-requirejs)
+ - [yii2-jsloader-systemjs](https://github.com/ischenko/yii2-jsloader-systemjs)
 
 ## Installation
 *Requires PHP >= 7.1
