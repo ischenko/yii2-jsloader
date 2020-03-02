@@ -1,6 +1,6 @@
 <?php
 
-namespace ischenko\yii2\jsloader\tests\unit\filters;
+namespace ischenko\yii2\jsloader\tests\unit\helpers;
 
 use Codeception\AssertThrows;
 use Codeception\Specify;
