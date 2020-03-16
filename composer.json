@@ -32,7 +32,7 @@
     "codeception/module-asserts": "~1.1"
   },
   "suggest": {
-    "ischenko/yii2-jsloader-requirejs": "RequireJS loader"
+    "ischenko/yii2-jsloader-systemjs": "SystemJS loader"
   },
   "autoload": {
     "psr-4": {
