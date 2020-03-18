@@ -27,7 +27,14 @@ class NotEmptyFiles extends Filter
     public function match($data): bool
     {
         if ($data instanceof ModuleInterface) {
-            return !empty($data->getFiles());
+            $files = $data->getFiles();
+            $count = $this->getValue();
+
+            if ($count === null && $files !== []) {
+                return true;
+            }
+
+            return (intval($count) ?: 1) <= count($files);
         }
 
         return false;
